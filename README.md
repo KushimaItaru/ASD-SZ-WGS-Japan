@@ -28,6 +28,9 @@ timestamps in manifest files.
 ├── config_v1.sh                          # Central configuration
 ├── README.md
 ├── CODE_AVAILABILITY.md
+├── LICENSE                               # MIT License
+├── requirements.txt                      # Python dependencies
+├── environment.yml                       # Conda environment (Python + bioinformatics tools)
 ├── .gitignore
 ├── strling/                              # STRling entry-point wrappers
 │   ├── 01_strling_build_panel.sh
@@ -126,6 +129,32 @@ the repository:
 Before running either pipeline, generate sample lists via
 `ehdn/01_ehdn_setup_and_sample_lists.sh` or provide equivalent files
 manually.
+
+## Environment setup
+
+Install Python dependencies with pip:
+
+```bash
+pip install -r requirements.txt
+```
+
+Or create a complete conda environment including bioinformatics tools:
+
+```bash
+conda env create -f environment.yml
+conda activate tre-burden
+```
+
+The following external tools are required and must be available on `$PATH`:
+
+| Tool | Tested version | Purpose |
+|------|----------------|---------|
+| Python | >= 3.10 | Helper scripts |
+| samtools | >= 1.17 | Depth calculation, CRAM handling |
+| bedtools | >= 2.31 | Genomic interval operations |
+| STRling | 0.5.2 | Tandem repeat genotyping |
+| ExpansionHunter Denovo | 0.9 | Tandem repeat profiling |
+| SLURM | — | Job scheduling (NIG supercomputer) |
 
 ---
 
@@ -265,3 +294,8 @@ top-level `strling/`, `ehdn/`, and `crosscaller/` directories rather than
 calling helper scripts directly. This provides a cleaner execution history,
 explicit job dependency handling, and clearer workflow presentation while
 preserving the original analytical implementation in `helpers/`.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for
+details.

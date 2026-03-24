@@ -2,28 +2,27 @@
 
 ## Recommended version (Nature Communications)
 
-Code used for the tandem repeat expansion analyses is available at
-https://github.com/KushimaItaru/ASD-SZ-WGS-Japan. The repository includes the
-main entry-point wrapper scripts for reproducing the STRling and EHdn analyses,
-together with the underlying helper scripts, configuration files, and
-documentation described in the README. For STRling, the primary entry-point
-scripts are `strling/01_strling_build_panel.sh`,
-`strling/02_strling_casecontrol_call_and_outliers.sh`,
-`strling/03_strling_casecontrol_burden.sh`, and
-`crosscaller/04_tre_crosscaller_compare.sh`. For EHdn, the primary entry-point
-scripts are `ehdn/01_ehdn_setup_and_sample_lists.sh`,
-`ehdn/02_ehdn_depth.sh`, `ehdn/03_ehdn_profile_and_merge.sh`, and
-`ehdn/04_ehdn_casecontrol_burden.sh`. These wrapper scripts organize execution
-order and job dependencies but do not alter the analytical logic.
+Code for the tandem repeat expansion analyses is available at the GitHub
+repository ASD-SZ-WGS-Japan:
+https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (commit `e0664d2`).
+The repository contains the main entry-point wrapper scripts for the STRling
+and ExpansionHunter Denovo (EHdn) pipelines, the underlying helper scripts,
+configuration files, and documentation required to reproduce the primary
+tandem repeat burden analyses. Wrapper scripts organize execution order and
+job dependencies but do not alter the analytical logic.
 
 ## Shorter version (if space is limited)
 
 Code for the tandem repeat expansion analyses is available at
-https://github.com/KushimaItaru/ASD-SZ-WGS-Japan. The repository contains
-the main entry-point wrapper scripts for the STRling and EHdn pipelines,
-the underlying helper scripts, configuration files, and a README describing
-execution order and dependencies. The wrapper scripts organize workflow
-execution and job dependencies without changing the analytical logic.
+https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (commit `e0664d2`).
+The repository includes the main entry-point wrapper scripts for the STRling
+and EHdn pipelines, together with helper scripts, configuration files, and
+documentation for reproducing the primary burden analyses.
+
+---
+
+*Note: Replace the commit hash above with the final release tag (e.g.,
+`v1.0.0`) before manuscript submission.*
 
 ---
 

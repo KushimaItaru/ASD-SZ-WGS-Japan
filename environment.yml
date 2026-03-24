@@ -1,0 +1,17 @@
+# Conda environment for TRE burden analysis
+# Usage: conda env create -f environment.yml
+name: tre-burden
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.10
+  - pandas>=2.0
+  - numpy>=1.24
+  - scipy>=1.10
+  - statsmodels>=0.14
+  - samtools>=1.17
+  - bedtools>=2.31
+  - strling=0.5.2
+  - expansionhunterdenovo=0.9
