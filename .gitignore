@@ -1,0 +1,12 @@
+# Data files (contain sample IDs / personal information)
+common/sample_lists/
+common/depth/
+common/resources/
+
+# SLURM logs (test runs)
+strling/logs/test/
+ehdn/logs/
+crosscaller/logs/
+
+# Temp files
+*.tmp
