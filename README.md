@@ -1,78 +1,93 @@
-# str_03242026 — Publication-Ready TRE Burden Analysis Pipeline
+# TRE Burden Analysis Pipeline — GRIFIN-PD WGS
 
 ## Overview
 
-This directory contains the publication-ready organization of the tandem repeat
-expansion (TRE) burden analysis pipeline for the GRIFIN-PD whole-genome
-sequencing study.
+This repository contains the publication-ready workflow for the tandem repeat
+expansion (TRE) burden analysis in the GRIFIN-PD whole-genome sequencing study.
 
-Two project layers currently coexist:
+The repository is organized into two layers:
 
-| Directory | Role |
-|-----------|------|
-| `str_12282025` | Original working directory containing the helper scripts, intermediate outputs, and full analysis history. This directory is retained unchanged for provenance and reproducibility. |
-| `str_03242026` | Reorganized entry-point directory containing clean wrapper scripts, shared symlinked inputs, and this README. This directory is intended for code-availability presentation and reproducible workflow entry points. |
+| Layer | Contents |
+|-------|----------|
+| Entry-point wrappers (`strling/`, `ehdn/`, `crosscaller/`) | Clean wrapper scripts that define execution order, SLURM job dependencies, and logging. These are the recommended starting point for understanding and reproducing the workflow. |
+| Helper scripts (`helpers/`) | The underlying analytical scripts called by the wrappers. These perform the actual computation (genotyping, merging, burden testing, etc.). |
 
-At the current stage, the wrapper scripts in `str_03242026` call helper scripts
-that still reside in `str_12282025`. This is intentional. The wrappers improve
-workflow readability and execution-order clarity, while the original helper
-scripts and outputs remain preserved in the historical analysis directory. A
-future step may migrate helper scripts into `str_03242026` for full
-self-containment.
+The wrapper scripts perform **no analytical computation**. They only determine
+array sizes from sample lists, submit helper scripts via `sbatch`, chain jobs
+with `--dependency=afterok`, and record Job IDs and timestamps in manifest
+files.
 
 ## Directory structure
 
 ```text
-str_03242026/
-├── config_v1.sh
+.
+├── config_v1.sh                          # Central configuration
 ├── README.md
-├── common/
-│   ├── sample_lists/
-│   │   ├── ehdn_all_samples.tsv
-│   │   └── casecontrol_samples.tsv
-│   ├── depth/
-│   │   └── depths_all.tsv
-│   ├── resources/
-│   │   ├── gene_regions_1kb_pad.bed
-│   │   └── blacklist/
-│   └── logs/
-├── ehdn/
+├── CODE_AVAILABILITY.md
+├── .gitignore
+├── strling/                              # STRling entry-point wrappers
+│   ├── 01_strling_build_panel.sh
+│   ├── 02_strling_casecontrol_call_and_outliers.sh
+│   └── 03_strling_casecontrol_burden.sh
+├── ehdn/                                 # EHdn entry-point wrappers
 │   ├── 01_ehdn_setup_and_sample_lists.sh
 │   ├── 02_ehdn_depth.sh
 │   ├── 03_ehdn_profile_and_merge.sh
-│   ├── 04_ehdn_casecontrol_burden.sh
-│   └── logs/
-├── strling/
-│   ├── 01_strling_build_panel.sh
-│   ├── 02_strling_casecontrol_call_and_outliers.sh
-│   ├── 03_strling_casecontrol_burden.sh
-│   └── logs/
-└── crosscaller/
-    └── 04_tre_crosscaller_compare.sh
+│   └── 04_ehdn_casecontrol_burden.sh
+├── crosscaller/                          # Cross-caller entry-point wrapper
+│   └── 04_tre_crosscaller_compare.sh
+└── helpers/                              # Underlying analytical scripts
+    ├── 00_setup_project_v4.sh
+    ├── strling/
+    │   ├── 00_strling_genomewide_config_v1.sh
+    │   ├── 01_strling_extract_array_genomewide_v3.sh
+    │   ├── 01_calc_depth_array_fast_v2.sh
+    │   ├── 03_strling_merge_by_chrom_genomewide_v3.sh
+    │   ├── 03_collect_depths_v1.py
+    │   ├── 04_strling_make_joint_bounds_genomewide_v1.sh
+    │   ├── 04b_make_joint_bounds_genic_len3_8_v2.sh
+    │   ├── 06_strling_call_array_genic_v1.sh
+    │   ├── 08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py
+    │   ├── 09_strling_qc_sensitivity_rare_inbounds_v4.py
+    │   ├── 10_make_calls_genic_inbounds_v1.py
+    │   └── 11_strling_outliers_casecontrol_inbounds_v1.sh
+    ├── ehdn/
+    │   ├── 01_prepare_sample_lists_v2.py
+    │   ├── 02_run_ehdn_array_v2.sh
+    │   ├── 04_merge_ehdn_novel_norm_v2.py
+    │   ├── 14_outlier_burden_rare_casecontrol_crossfit_v19.py
+    │   └── 17_burden_statistical_test_v20.py
+    └── crosscaller/
+        └── 20_tre_case_case_comparison_v3.py
 ```
 
-### Shared inputs
+## Path configuration
 
-The `common/` directory contains shared inputs linked from the original
-analysis directory:
+The helper scripts contain hardcoded paths from the original analysis
+environment (NIG supercomputer). These paths are marked with `# CONFIGURE`
+comments. To run the pipeline in a different environment, update the following:
 
-- `common/sample_lists/` — `ehdn_all_samples.tsv`, `casecontrol_samples.tsv`
-- `common/depth/` — `depths_all.tsv`
-- `common/resources/` — `gene_regions_1kb_pad.bed` and blacklist/repeat-filtering resources used by EHdn
+- **`config_v1.sh`**: Central configuration file. Paths can be overridden via
+  environment variables using the `${VAR:-default}` pattern.
+- **`helpers/strling/00_strling_genomewide_config_v1.sh`**: STRling-specific
+  configuration (panel paths, output directories, SLURM defaults).
+- **Individual helper scripts**: Some scripts define `PROJECT_ROOT` and
+  `OUT_ROOT` internally; update these or set them as environment variables.
 
-These symlinks keep the reorganized workflow lightweight while preserving the
-original data layout.
+Key paths that need adjustment:
 
-## Shared configuration
+| Variable | Description | Original value |
+|----------|-------------|----------------|
+| `PROJECT_ROOT` | Analysis root directory | `/lustre12/home/kushima-pg/str_12282025` |
+| `REFERENCE_FASTA` | GRCh38 reference genome | `/lustre12/home/grifinpd-pg/resource_2020Aug/Homo_sapiens_assembly38.fasta` |
+| `SAMPLE_INFO` | Sample metadata file | `/lustre12/home/kushima-pg/sampleInfo/GRIFIN_srWGS_SampleInfo_11242025.txt` |
+| `PCA_EIGENVEC` | PCA eigenvector file | `/lustre12/home/kushima-pg/PRS/.../pca.eigenvec` |
+| `CRAM_BASE_DIR1` | CRAM directory (GRIFIN) | `/lustre12/home/grifinpd-pg/analysis/parabricks` |
+| `CRAM_BASE_DIR2` | CRAM directory (NCBN) | `/lustre12/home/ncbn-share-pg/control_genome/pb3.1.0/results` |
 
-The helper scripts use two configuration layers depending on the caller.
-
-- **STRling helpers** source `str_12282025/strling/00_strling_genomewide_config_v1.sh`, which defines STRling-specific paths, panel-construction parameters, sample lists, output directories, and SLURM defaults.
-- **EHdn helpers** source `str_12282025/config_v1.sh`, which defines project-wide paths, reference genome, EHdn binary, sample metadata, depth files, shared resources, and SLURM defaults.
-
-In the current intermediate layout, the entry-point wrappers reside under
-`str_03242026`, whereas the helper scripts and their configuration files still
-reside under `str_12282025`.
+Sample list files (`ehdn_all_samples.tsv`, `casecontrol_samples.tsv`) and
+depth files (`depths_all.tsv`) are excluded from this repository because they
+contain sample-level identifiers.
 
 ---
 
@@ -106,12 +121,10 @@ heterogeneity analyses.
 
 | Wrapper | Helpers called |
 |---------|---------------|
-| `strling/01_strling_build_panel.sh` | `strling/01_strling_extract_array_genomewide_v3.sh` → `strling/03_strling_merge_by_chrom_genomewide_v3.sh` → `strling/04_strling_make_joint_bounds_genomewide_v1.sh` → `strling/04b_make_joint_bounds_genic_len3_8_v2.sh` |
-| `strling/02_strling_casecontrol_call_and_outliers.sh` | `strling/06_strling_call_array_genic_v1.sh` → `strling/10_make_calls_genic_inbounds_v1.py` → `strling/11_strling_outliers_casecontrol_inbounds_v1.sh` |
-| `strling/03_strling_casecontrol_burden.sh` | `strling/08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py` → `strling/09_strling_qc_sensitivity_rare_inbounds_v4.py` |
-| `crosscaller/04_tre_crosscaller_compare.sh` | `ehdn-strling_01022026/20_tre_case_case_comparison_v3.py` |
-
-All helper paths are relative to `str_12282025/`.
+| `strling/01_strling_build_panel.sh` | `helpers/strling/01_strling_extract_array_genomewide_v3.sh` → `helpers/strling/03_strling_merge_by_chrom_genomewide_v3.sh` → `helpers/strling/04_strling_make_joint_bounds_genomewide_v1.sh` → `helpers/strling/04b_make_joint_bounds_genic_len3_8_v2.sh` |
+| `strling/02_strling_casecontrol_call_and_outliers.sh` | `helpers/strling/06_strling_call_array_genic_v1.sh` → `helpers/strling/10_make_calls_genic_inbounds_v1.py` → `helpers/strling/11_strling_outliers_casecontrol_inbounds_v1.sh` |
+| `strling/03_strling_casecontrol_burden.sh` | `helpers/strling/08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py` → `helpers/strling/09_strling_qc_sensitivity_rare_inbounds_v4.py` |
+| `crosscaller/04_tre_crosscaller_compare.sh` | `helpers/crosscaller/20_tre_case_case_comparison_v3.py` |
 
 ---
 
@@ -145,50 +158,33 @@ and Mann–Whitney U tests.
 
 | Wrapper | Helpers called |
 |---------|---------------|
-| `ehdn/01_ehdn_setup_and_sample_lists.sh` | `00_setup_project_v4.sh` → `ehdn/01_prepare_sample_lists_v2.py` |
-| `ehdn/02_ehdn_depth.sh` | `strling/01_calc_depth_array_fast_v2.sh` → `strling/03_collect_depths_v1.py` |
-| `ehdn/03_ehdn_profile_and_merge.sh` | `ehdn/02_run_ehdn_array_v2.sh` → `ehdn/04_merge_ehdn_novel_norm_v2.py` |
-| `ehdn/04_ehdn_casecontrol_burden.sh` | `ehdn/14_outlier_burden_rare_casecontrol_crossfit_v19.py` → `ehdn/17_burden_statistical_test_v20.py` |
-
-All helper paths are relative to `str_12282025/`.
+| `ehdn/01_ehdn_setup_and_sample_lists.sh` | `helpers/00_setup_project_v4.sh` → `helpers/ehdn/01_prepare_sample_lists_v2.py` |
+| `ehdn/02_ehdn_depth.sh` | `helpers/strling/01_calc_depth_array_fast_v2.sh` → `helpers/strling/03_collect_depths_v1.py` |
+| `ehdn/03_ehdn_profile_and_merge.sh` | `helpers/ehdn/02_run_ehdn_array_v2.sh` → `helpers/ehdn/04_merge_ehdn_novel_norm_v2.py` |
+| `ehdn/04_ehdn_casecontrol_burden.sh` | `helpers/ehdn/14_outlier_burden_rare_casecontrol_crossfit_v19.py` → `helpers/ehdn/17_burden_statistical_test_v20.py` |
 
 ---
 
 ## Utilities excluded from the main analysis path
 
-The following scripts are retained for reference but are not part of the
-current primary TRE burden workflow:
+The following scripts were used in earlier exploratory analyses and are not
+part of the primary TRE burden workflow reported in the manuscript:
 
-- `str_12282025/ehdn/15_annotate_genes_v18_gencode.py`
-- `str_12282025/ehdn/16_gene_significance_test_v18.py`
-
-These scripts were used in earlier exploratory or legacy analyses and are not
-required to reproduce the main burden results reported in the manuscript.
+- `ehdn/15_annotate_genes_v18_gencode.py`
+- `ehdn/16_gene_significance_test_v18.py`
 
 ## Result invariance
 
-The wrapper scripts perform **no analytical computation**. They only:
-
-1. determine array sizes from sample lists,
-2. submit helper scripts via `sbatch`,
-3. chain jobs with `--dependency=afterok`, and
-4. record Job IDs and timestamps in manifest files.
-
-**Given identical inputs and identical helper scripts, the analytical results
-are unchanged.** This reorganization is intended only to improve
-execution-order clarity and code-availability presentation. This applies
-equally to both the STRling and EHdn pipelines.
+The wrapper scripts perform **no analytical computation**. Given identical
+inputs and identical helper scripts, the analytical results are unchanged.
+This reorganization is intended only to improve execution-order clarity and
+code-availability presentation. This applies equally to both the STRling and
+EHdn pipelines.
 
 ## Logging and manifests
 
-Each wrapper writes:
-
-- a timestamped manifest file under its own `logs/` directory,
-- submitted SLURM Job IDs, and
-- wrapper-level stdout/stderr logs where applicable.
-
-The underlying helper scripts continue to write their original logs in the
-historical analysis directory unless and until the helper layer is migrated.
+Each wrapper writes a timestamped manifest file under its own `logs/`
+directory, including submitted SLURM Job IDs and wrapper-level timing.
 
 ## Approximate runtime
 
@@ -222,8 +218,8 @@ historical analysis directory unless and until the helper layer is migrated.
 
 ## Recommended usage
 
-For publication-oriented reproduction, use the wrapper scripts in
-`str_03242026` rather than calling helper scripts manually. This provides a
-cleaner execution history, explicit job dependency handling, and clearer
-code-availability presentation while preserving the original analytical
-implementation.
+For publication-oriented reproduction, use the wrapper scripts in the
+top-level `strling/`, `ehdn/`, and `crosscaller/` directories rather than
+calling helper scripts directly. This provides a cleaner execution history,
+explicit job dependency handling, and clearer workflow presentation while
+preserving the original analytical implementation in `helpers/`.
