@@ -23,10 +23,10 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-HELPER_DIR="/home/kushima-pg/str_12282025/ehdn"
-SAMPLE_LIST="/home/kushima-pg/str_12282025/sample_lists/ehdn_all_samples.tsv"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/../str_12282025/ehdn}"
+SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/../str_12282025/sample_lists/ehdn_all_samples.tsv}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -50,7 +50,7 @@ echo "[$(TS)] [Step1] EHdn profile submitted: JobID=${JOB1}" | tee -a "${MANIFES
 
 # ---- Step 2: merge (single job, after profile) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=4 --mem=64G --time=02:00:00 \
     --job-name=ehdn_merge \
     --output="${LOG_DIR}/merge_%j.out" \

@@ -19,9 +19,9 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-HELPER_DIR="/home/kushima-pg/str_12282025/strling"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/../str_12282025/strling}"
 CONFIG="${HELPER_DIR}/00_strling_genomewide_config_v1.sh"
 
 source "${CONFIG}"
@@ -36,22 +36,22 @@ echo "[$(TS)] HELPER_DIR=${HELPER_DIR}" | tee -a "${MANIFEST}"
 
 # ---- Step 1: burden analysis (single job) ----
 JOB1=$(sbatch --parsable \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=8 --mem=64G --time=01:00:00 \
     --job-name=strling_burden_v9 \
     --output="${LOG_DIR}/burden_v9_%j.out" \
     --error="${LOG_DIR}/burden_v9_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py --merge_dist 1000'" )
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py --merge_dist 1000'")
 echo "[$(TS)] [Step1] burden v9 submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: QC / sensitivity (single job, after burden) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=4 --mem=32G --time=00:30:00 \
     --job-name=strling_qc_v4 \
     --output="${LOG_DIR}/qc_v4_%j.out" \
     --error="${LOG_DIR}/qc_v4_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 09_strling_qc_sensitivity_rare_inbounds_v4.py'" )
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 09_strling_qc_sensitivity_rare_inbounds_v4.py'")
 echo "[$(TS)] [Step2] QC/sensitivity v4 submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

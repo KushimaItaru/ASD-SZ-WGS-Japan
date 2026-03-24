@@ -24,10 +24,10 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-HELPER_DIR="/home/kushima-pg/str_12282025/strling"
-SAMPLE_LIST="/home/kushima-pg/str_12282025/sample_lists/ehdn_all_samples.tsv"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/../str_12282025/strling}"
+SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/../str_12282025/sample_lists/ehdn_all_samples.tsv}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -51,7 +51,7 @@ echo "[$(TS)] [Step1] depth submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: collect depths (single job, after depth array) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=1 --mem=8G --time=00:30:00 \
     --job-name=ehdn_collect_depths \
     --output="${LOG_DIR}/collect_depths_%j.out" \

@@ -19,9 +19,9 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-HELPER_ROOT="/home/kushima-pg/str_12282025"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HELPER_ROOT="${HELPER_ROOT:-${WRAPPER_ROOT}/../str_12282025}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -33,7 +33,7 @@ echo "[$(TS)] HELPER_ROOT=${HELPER_ROOT}" | tee -a "${MANIFEST}"
 
 # ---- Step 1: setup (single job) ----
 JOB1=$(sbatch --parsable \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=1 --mem=4G --time=00:10:00 \
     --job-name=ehdn_setup \
     --output="${LOG_DIR}/setup_%j.out" \
@@ -43,7 +43,7 @@ echo "[$(TS)] [Step1] setup submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: sample list creation (single job, after setup) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=1 --mem=8G --time=00:10:00 \
     --job-name=ehdn_sample_lists \
     --output="${LOG_DIR}/sample_lists_%j.out" \

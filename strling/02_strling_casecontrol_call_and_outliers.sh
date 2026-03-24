@@ -2,15 +2,15 @@
 # 02_strling_casecontrol_call_and_outliers.sh
 # ファイル名: 02_strling_casecontrol_call_and_outliers.sh
 # 処理内容:
-# - STRling genotyping → in-bounds filter → outlier detection の入口ラッパー
-# - Step 1: call（genic panel上でSTRling call、アレイジョブ）
-# - Step 2: in-bounds filter（call結果をgenic boundsで絞り込み）
-# - Step 3: outlier detection（strling-outliers で z-score 算出）
-# - 各ステップは sbatch dependency で連鎖
-# - 投入した Job ID を manifest ファイルに記録
+#   - STRling genotyping → in-bounds filter → outlier detection の入口ラッパー
+#   - Step 1: call（genic panel上でSTRling call、アレイジョブ）
+#   - Step 2: in-bounds filter（call結果をgenic boundsで絞り込み）
+#   - Step 3: outlier detection（strling-outliers で z-score 算出）
+#   - 各ステップは sbatch dependency で連鎖
+#   - 投入した Job ID を manifest ファイルに記録
 #
 # 前提:
-# - 01_strling_build_panel.sh が完了していること（genic bounds が存在すること）
+#   - 01_strling_build_panel.sh が完了していること（genic bounds が存在すること）
 #
 # 使い方:
 #   bash 02_strling_casecontrol_call_and_outliers.sh
@@ -51,24 +51,24 @@ echo "[$(TS)] [Step1] call submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: in-bounds filter (single job, after call) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-  --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=1 --mem=32G --time=00:30:00 \
-      --job-name=strling_inbounds \
-        --output="${LOG_DIR}/inbounds_%j.out" \
-          --error="${LOG_DIR}/inbounds_%j.err" \
-            --wrap="cd ${HELPER_DIR} && python3 10_make_calls_genic_inbounds_v1.py")
-            echo "[$(TS)] [Step2] in-bounds filter submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
+    --job-name=strling_inbounds \
+    --output="${LOG_DIR}/inbounds_%j.out" \
+    --error="${LOG_DIR}/inbounds_%j.err" \
+    --wrap="cd ${HELPER_DIR} && python3 10_make_calls_genic_inbounds_v1.py")
+echo "[$(TS)] [Step2] in-bounds filter submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
-            # ---- Step 3: outlier detection (single job, after in-bounds) ----
-            JOB3=$(sbatch --parsable --dependency=afterok:${JOB2} \
-              "${HELPER_DIR}/11_strling_outliers_casecontrol_inbounds_v1.sh")
-              echo "[$(TS)] [Step3] outlier detection submitted: JobID=${JOB3} (afterok:${JOB2})" | tee -a "${MANIFEST}"
+# ---- Step 3: outlier detection (single job, after in-bounds) ----
+JOB3=$(sbatch --parsable --dependency=afterok:${JOB2} \
+    "${HELPER_DIR}/11_strling_outliers_casecontrol_inbounds_v1.sh")
+echo "[$(TS)] [Step3] outlier detection submitted: JobID=${JOB3} (afterok:${JOB2})" | tee -a "${MANIFEST}"
 
-              # ---- Summary ----
-              SCRIPT_END=$(date +%s)
-              ELAPSED=$(( SCRIPT_END - SCRIPT_START ))
-              echo "" | tee -a "${MANIFEST}"
-              echo "[$(TS)] All steps submitted." | tee -a "${MANIFEST}"
-              echo "[$(TS)] Final outlier job: ${JOB3}" | tee -a "${MANIFEST}"
-              echo "[$(TS)] Submission elapsed: ${ELAPSED}s" | tee -a "${MANIFEST}"
-              echo "[$(TS)] Manifest: ${MANIFEST}" | tee -a "${MANIFEST}"
+# ---- Summary ----
+SCRIPT_END=$(date +%s)
+ELAPSED=$(( SCRIPT_END - SCRIPT_START ))
+echo "" | tee -a "${MANIFEST}"
+echo "[$(TS)] All steps submitted." | tee -a "${MANIFEST}"
+echo "[$(TS)] Final outlier job: ${JOB3}" | tee -a "${MANIFEST}"
+echo "[$(TS)] Submission elapsed: ${ELAPSED}s" | tee -a "${MANIFEST}"
+echo "[$(TS)] Manifest: ${MANIFEST}" | tee -a "${MANIFEST}"

@@ -19,9 +19,9 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-CROSSCALLER_DIR="/home/kushima-pg/str_12282025/ehdn-strling_01022026"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+CROSSCALLER_DIR="${HELPER_DIR_CROSSCALLER:-${WRAPPER_ROOT}/../str_12282025/ehdn-strling_01022026}"
 
 LOG_DIR="${WRAPPER_ROOT}/crosscaller/logs"
 mkdir -p "${LOG_DIR}"
@@ -33,12 +33,12 @@ echo "[$(TS)] CROSSCALLER_DIR=${CROSSCALLER_DIR}" | tee -a "${MANIFEST}"
 
 # ---- Step 1: case-case comparison (single job) ----
 JOB1=$(sbatch --parsable \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=4 --mem=32G --time=00:30:00 \
     --job-name=tre_case_case_v3 \
     --output="${LOG_DIR}/case_case_v3_%j.out" \
     --error="${LOG_DIR}/case_case_v3_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${CROSSCALLER_DIR} && python3 20_tre_case_case_comparison_v3.py'" )
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${CROSSCALLER_DIR} && python3 20_tre_case_case_comparison_v3.py'")
 echo "[$(TS)] [Step1] case-case v3 submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

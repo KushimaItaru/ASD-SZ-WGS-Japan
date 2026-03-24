@@ -27,9 +27,9 @@ set -euo pipefail
 SCRIPT_START=$(date +%s)
 TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
-# ---- Paths ----
-WRAPPER_ROOT="/home/kushima-pg/str_03242026"
-HELPER_DIR="/home/kushima-pg/str_12282025/ehdn"
+# ---- Paths (configurable via environment variables) ----
+WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/../str_12282025/ehdn}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -41,7 +41,7 @@ echo "[$(TS)] HELPER_DIR=${HELPER_DIR}" | tee -a "${MANIFEST}"
 
 # ---- Step 1: burden analysis (single job) ----
 JOB1=$(sbatch --parsable \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=8 --mem=128G --time=06:00:00 \
     --job-name=ehdn_burden_v19 \
     --output="${LOG_DIR}/burden_v19_%j.out" \
@@ -51,7 +51,7 @@ echo "[$(TS)] [Step1] burden v19 submitted: JobID=${JOB1}" | tee -a "${MANIFEST}
 
 # ---- Step 2: burden statistical test (single job, after burden) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
-    --partition=ncbn-cpu --account=ncbn-cpu \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
     --cpus-per-task=4 --mem=64G --time=02:00:00 \
     --job-name=ehdn_burden_stats_v20 \
     --output="${LOG_DIR}/burden_stats_v20_%j.out" \
