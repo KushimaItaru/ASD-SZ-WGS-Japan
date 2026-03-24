@@ -7,32 +7,33 @@
 # ============================================================================
 # 20_tre_case_case_comparison_v3.py
 #
-# 処理内容:
-#   - EHdn (v19) と STRling (v9) の per_sample.tsv を読み込み、ASD vs SZ の直接比較 (case-case) を実施
-#   - Primary: rare_any（≥1保有の二値）に対するロジスティック回帰 → OR (ASD vs SZ), 95%CI, P
-#   - Secondary: rare_outlier_count（カウント）に対するPoisson GLM → RR, 95%CI, P
-#     ※ v2変更: EHdn は observed_clusters_total, STRling は tested_loci_total を offset として使用
-#     ※ offset=0 のサンプルは Poisson GLM から除外（log(0) 未定義のため）
-#   - 補助: Mann-Whitney U検定（ノンパラメトリック）
-#   - Heterogeneity検定: 2つのcase-control OR (ASD vs Ctrl, SZ vs Ctrl) の均一性を
-#     Cochran's Q / Breslow-Day 類似アプローチで評価
-#   - 共変量: Sex_M, Depth, PC1-PC10
-#   - 実行時間を記録
+# Description:
+#   - Load per_sample.tsv from EHdn (v19) and STRling (v9) and run ASD vs SZ
+#     direct comparison (case-case)
+#   - Primary: logistic regression on rare_any (binary, >=1 carrier) -> OR (ASD vs SZ), 95%CI, P
+#   - Secondary: Poisson GLM on rare_outlier_count (count) -> RR, 95%CI, P
+#     Note (v2): EHdn uses observed_clusters_total, STRling uses tested_loci_total as offset
+#     Note: samples with offset=0 are excluded from Poisson GLM (log(0) undefined)
+#   - Auxiliary: Mann-Whitney U test (nonparametric)
+#   - Heterogeneity test: evaluate homogeneity of two case-control ORs (ASD vs Ctrl, SZ vs Ctrl)
+#     using Cochran's Q / Breslow-Day-like approach
+#   - Covariates: Sex_M, Depth, PC1-PC10
+#   - Record execution time
 #
-# v1→v2 変更点:
-#   - EHdn入力を v18 → v19 per_sample に変更（observed_clusters_total 列を含む）
-#   - Poisson GLM の offset を observed_clusters_total（EHdn）または tested_loci_total（STRling）
-#     から動的に検出して適用
-#   - offset=0 サンプルの除外とログ出力を追加
-#   - exposure 関連サマリーを出力に追加
+# v1->v2 changes:
+#   - EHdn input changed from v18 to v19 per_sample (includes observed_clusters_total column)
+#   - Poisson GLM offset dynamically detected from observed_clusters_total (EHdn) or
+#     tested_loci_total (STRling)
+#   - Added exclusion and logging of samples with offset=0
+#   - Added exposure summary to output
 #
-# 出力:
-#   - case_case_comparison_v3.tsv: ASD vs SZ の統計結果（EHdn, STRling 各行）
-#   - case_case_comparison_v3.model_summary.txt: 詳細レポート
-#   - case_case_comparison_v3.heterogeneity.tsv: Heterogeneity検定結果
+# Output:
+#   - case_case_comparison_v3.tsv: ASD vs SZ statistical results (one row per caller)
+#   - case_case_comparison_v3.model_summary.txt: detailed report
+#   - case_case_comparison_v3.heterogeneity.tsv: heterogeneity test results
 #
-# 使い方:
-#   python 20_tre_case_case_comparison_v3.py
+# Usage:
+#   Run via the top-level wrapper: crosscaller/04_tre_crosscaller_compare.sh
 
 from __future__ import annotations
 

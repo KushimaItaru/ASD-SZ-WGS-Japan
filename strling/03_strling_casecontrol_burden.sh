@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # 03_strling_casecontrol_burden.sh
-# ファイル名: 03_strling_casecontrol_burden.sh
-# 処理内容:
-#   - STRling burden 解析 + QC/感度解析の入口ラッパー
-#   - Step 1: burden 解析（5-fold cross-fit、Logistic + Poisson GLM）
-#   - Step 2: QC/感度解析（群別 summary、SMD、winsorize/trim 感度）
-#   - 各ステップは sbatch dependency で連鎖
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 03_strling_casecontrol_burden.sh
+# Description:
+#   - Entry-point wrapper for STRling burden + QC/sensitivity analysis
+#   - Step 1: burden analysis (5-fold cross-fit, Logistic + Poisson GLM)
+#   - Step 2: QC/sensitivity (per-group summary, SMD, winsorize/trim sensitivity)
+#   - Steps are chained via sbatch dependency
+#   - Record submitted Job IDs in manifest file
 #
-# 前提:
-#   - 02_strling_casecontrol_call_and_outliers.sh が完了していること（STRs.tsv が存在すること）
+# Prerequisites:
+#   - 02_strling_casecontrol_call_and_outliers.sh must have completed (STRs.tsv must exist)
 #
-# 使い方:
+# Usage:
 #   bash 03_strling_casecontrol_burden.sh
 
 set -euo pipefail

@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 # 01_strling_build_panel.sh
-# ファイル名: 01_strling_build_panel.sh
-# 処理内容:
-#   - STRling パネル構築パイプラインの入口ラッパー
-#   - Step 1: extract（CRAMから.bin抽出、アレイジョブ）
-#   - Step 2: merge（染色体ごとにmerge、アレイジョブ 1-24）
-#   - Step 3: joint-bounds（全染色体のboundsを結合）
-#   - Step 4: genic filter（genic 3-8bp lociに絞り込み）
-#   - 各ステップは sbatch dependency で連鎖し、前段完了後に次段を開始
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 01_strling_build_panel.sh
+# Description:
+#   - Entry-point wrapper for STRling panel construction pipeline
+#   - Step 1: extract (extract .bin from CRAM, array job)
+#   - Step 2: merge (per-chromosome merge, array job 1-24)
+#   - Step 3: joint-bounds (concatenate bounds from all chromosomes)
+#   - Step 4: genic filter (restrict to genic 3-8 bp loci)
+#   - Steps are chained via sbatch dependency; each starts after the previous completes
+#   - Record submitted Job IDs in manifest file
 #
-# 使い方:
+# Usage:
 #   bash 01_strling_build_panel.sh
 #
-# 注意:
-#   - 既存 helper script の処理内容は一切変更しない
-#   - extract/call のアレイサイズはサンプルリストから動的に決定
+# Notes:
+#   - Analytical logic in helper scripts is not modified
+#   - Array sizes for extract/call are dynamically determined from sample lists
 
 set -euo pipefail
 

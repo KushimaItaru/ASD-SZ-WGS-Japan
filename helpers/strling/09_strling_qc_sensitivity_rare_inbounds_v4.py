@@ -6,19 +6,19 @@
 # (e.g. SAMPLE_INFO, PCA_EIGENVEC, CRAM_BASE_DIR1, CRAM_BASE_DIR2).
 # ============================================================================
 # 09_strling_qc_sensitivity_rare_inbounds_v4.py
-# - 処理内容:
-#   - v9 per_sample.tsv（rare_outlier_count/rare_any を含む）を読み込み、QC＋感度解析を一括実行
-#   - 群別summary（Depth/PC/rare_outlier_count/rare_any など）
-#   - SMD（ASD vs Healthy / SZ vs Healthy）
-#   - モデル（statsmodelsがあれば）:
-#       1) rare_any のロジスティック（ゼロ過剰・極端値に頑健）
-#       2) rare_outlier_count の Poisson offset（exposure=tested_loci_total）
-#       3) rare_outlier_count の q99 winsorize Poisson（極端値感度）
-#       4) rare_outlier_count のトリム（thr<10/20/30）Poisson（極端値感度）
-#   - 上位サンプル（rare_outlier_count 上位）を出力
-#   - 実行時間を記録
+# - Description:
+#   - Load v9 per_sample.tsv (with rare_outlier_count/rare_any) and run QC + sensitivity analysis
+#   - Per-group summary (Depth/PC/rare_outlier_count/rare_any, etc.)
+#   - SMD (ASD vs Healthy / SZ vs Healthy)
+#   - Models (if statsmodels available):
+#       1) Logistic on rare_any (robust to zero-inflation and extreme values)
+#       2) Poisson with offset on rare_outlier_count (exposure=tested_loci_total)
+#       3) Poisson with q99 winsorization on rare_outlier_count (extreme value sensitivity)
+#       4) Poisson with trimming (thr<10/20/30) on rare_outlier_count (extreme value sensitivity)
+#   - Output top samples by rare_outlier_count
+#   - Record execution time
 #
-# 使い方（引数なし）:
+# Usage (no arguments):
 #   cd <repo_root>/helpers/strling
 #   python 09_strling_qc_sensitivity_rare_inbounds_v4.py
 
@@ -124,13 +124,13 @@ def main() -> None:
     outdir.mkdir(parents=True, exist_ok=True)
 
     ap = argparse.ArgumentParser(add_help=True)
-    # ★変更点: デフォルトを v9 に設定
+    # Changes: default set to v9
     ap.add_argument(
         "--per_sample_tsv",
         default=str(outdir / "strling_outlier_burden_rare_crossfit_inbounds_v9.per_sample.tsv"),
     )
-    # ★変更点: 出力プレフィックスも v9 に設定
-    ap.add_argument("--out_prefix", default="qc_sensitivity_strling_inbounds_v9", help="出力プレフィックス")
+    # Changes: output prefix also set to v9
+    ap.add_argument("--out_prefix", default="qc_sensitivity_strling_inbounds_v9", help="Output prefix")
     ap.add_argument("--topn", type=int, default=50)
     ap.add_argument("--trim_thresholds", default="10,20,30")
     args = ap.parse_args()

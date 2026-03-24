@@ -16,21 +16,21 @@
 #SBATCH --time=48:00:00
 
 # ehdn/02_run_ehdn_array_v2.sh (FIXED)
-# - sample_lists/ehdn_all_samples.tsv（ASD/SZ/Healthy/family_member）を対象に EHdn profile を実行
-# - Slurm実行環境でも config_v1.sh を確実に読むため、PROJECT_ROOT を絶対パスで指定
-# - 出力: ehdn_output/<SampleID>/<SampleID>.locus.tsv 等
-# - 実行時間を記録
+# - Run EHdn profile on sample_lists/ehdn_all_samples.tsv (ASD/SZ/Healthy/family_member)
+# - Set PROJECT_ROOT as absolute path to ensure config_v1.sh is readable in Slurm environment
+# - Output: ehdn_output/<SampleID>/<SampleID>.locus.tsv etc.
+# - Record execution time
 
 set -euo pipefail
 
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-# ★重要：Slurm上で確実に見つかるようプロジェクトルートを絶対パスで固定
+# IMPORTANT: Fix project root as absolute path for reliable access under Slurm
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "${PROJECT_ROOT}/config_v1.sh"
 
-# Slurmがログを開けずに落ちるのを避ける（念のため）
+# Prevent Slurm from failing to open logs (precaution)
 mkdir -p "${LOG_DIR}/ehdn" "${EHDN_OUT_DIR}"
 
 echo "[$(TS)] [INFO] EHdn array start: job=${SLURM_JOB_ID:-NA} task=${SLURM_ARRAY_TASK_ID:-NA}"
@@ -66,7 +66,7 @@ OUTDIR="${EHDN_OUT_DIR}/${SAMPLE_ID}"
 mkdir -p "${OUTDIR}"
 OUTPREFIX="${OUTDIR}/${SAMPLE_ID}"
 
-# 既に locus.tsv があればスキップ（再実行時の高速化）
+# Skip if locus.tsv already exists (faster re-runs)
 if [ -s "${OUTPREFIX}.locus.tsv" ]; then
   echo "[$(TS)] [INFO] Already done: ${OUTPREFIX}.locus.tsv -> skip"
   END=$(date +%s)

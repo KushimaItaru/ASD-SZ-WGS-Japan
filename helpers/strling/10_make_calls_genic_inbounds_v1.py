@@ -6,17 +6,17 @@
 # (e.g. SAMPLE_INFO, PCA_EIGENVEC, CRAM_BASE_DIR1, CRAM_BASE_DIR2).
 # ============================================================================
 # 10_make_calls_genic_inbounds_v1.py
-# - 処理内容:
-#   - STRling の joint-bounds（genic + repeatunit 3–8bp）から IN_BOUNDS の locus key を作成
-#   - calls_genic/ 配下の *-genotype.txt を、IN_BOUNDS のみ残すようにフィルタ
-#   - 出力先 calls_genic_inbounds/ に *-genotype.txt を作成（ヘッダ保持）
-#   - 各ファイルの入力/出力行数、IN/OUT 内訳を summary TSV に記録
-#   - 実行時間（秒）を記録
+# - Description:
+#   - Create IN_BOUNDS locus keys from STRling joint-bounds (genic + repeatunit 3-8 bp)
+#   - Filter *-genotype.txt under calls_genic/ to retain only IN_BOUNDS loci
+#   - Write *-genotype.txt to calls_genic_inbounds/ (retaining header)
+#   - Record input/output row counts and IN/OUT breakdown per file in a summary TSV
+#   - Record execution time (seconds)
 #
-# 使い方:
+# Usage:
 #   Run via the top-level wrapper: strling/02_strling_casecontrol_call_and_outliers.sh
 #
-# パスを明示する場合:
+# To specify paths explicitly:
 #   python3 strling/10_make_calls_genic_inbounds_v1.py \
 #     --bounds /path/to/joint-bounds.genic_1kbpad.len3_8.txt \
 #     --calls-dir /path/to/calls_genic \
@@ -51,8 +51,8 @@ def norm_colname(x: str) -> str:
 
 def detect_indices(header_fields: List[str]) -> Tuple[int, int, int, int]:
     """
-    chrom/left/right/repeatunit の列位置をヘッダ名から推定。
-    見つからなければ (0,1,2,3) を返す。
+    Infer column positions for chrom/left/right/repeatunit from header names.
+    Fall back to (0,1,2,3) if not found.
     """
     norm = [norm_colname(x) for x in header_fields]
     # STRling bounds: #chrom left right repeat ...
@@ -78,14 +78,14 @@ def detect_indices(header_fields: List[str]) -> Tuple[int, int, int, int]:
 
 
 def make_key(chrom: str, left: str, right: str, rep: str) -> str:
-    # key を 4列で一意化（タブ区切り）
+    # Create unique key from 4 columns (tab-separated)
     return f"{chrom}\t{left}\t{right}\t{rep}"
 
 
 def load_inbounds_keys(bounds_path: Path) -> Tuple[set[str], List[str]]:
     """
-    boundsファイル（ヘッダ付き）から IN_BOUNDS の key 集合を作る。
-    戻り値: (keys_set, header_fields)
+    Build IN_BOUNDS key set from bounds file (with header).
+    Returns: (keys_set, header_fields)
     """
     if not bounds_path.exists():
         raise FileNotFoundError(f"Bounds file not found: {bounds_path}")
@@ -152,7 +152,7 @@ def filter_one_genotype(
         return FileSummary(sid, str(infile), str(outfile), 0, 0, 0, 0, "EMPTY_INFILE", "infile is empty")
 
     if outfile.exists() and skip_if_exists and outfile.stat().st_size > 0:
-        # 既に作成済みならスキップ
+        # Skip if already created
         return FileSummary(sid, str(infile), str(outfile), 0, 0, 0, 0, "SKIP_EXISTS", "outfile exists")
 
     if outfile.exists() and (not overwrite) and (not skip_if_exists):
@@ -183,7 +183,7 @@ def filter_one_genotype(
                         continue
                     parts = line.split("\t")
                     if len(parts) <= max(ci, li, ri, mi):
-                        # 列崩れは out_of_bounds 扱い（安全側）
+                        # Treat malformed rows as out_of_bounds (safe fallback)
                         out_bounds += 1
                         in_lines += 1
                         continue
@@ -215,47 +215,47 @@ def filter_one_genotype(
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    # デフォルトはあなたのプロジェクト構造に合わせる
+    # Defaults match the expected project structure
     project_root = Path(__file__).resolve().parents[2]
     out_root = project_root / "strling_output_genomewide"
 
     ap.add_argument(
         "--bounds",
         default=str(out_root / "str-results" / "joint-bounds.genic_1kbpad.len3_8.txt"),
-        help="IN_BOUNDS を定義する joint-bounds（genic+len3_8）",
+        help="Joint-bounds (genic+len3_8) defining IN_BOUNDS",
     )
     ap.add_argument(
         "--calls-dir",
         default=str(out_root / "calls_genic"),
-        help="入力 genotype があるディレクトリ（calls_genic）",
+        help="Directory containing input genotype files (calls_genic)",
     )
     ap.add_argument(
         "--out-dir",
         default=str(out_root / "calls_genic_inbounds"),
-        help="出力先ディレクトリ（calls_genic_inbounds）",
+        help="Output directory (calls_genic_inbounds)",
     )
     ap.add_argument(
         "--pattern",
         default="*-genotype.txt",
-        help="入力ファイルパターン（デフォルト: *-genotype.txt）",
+        help="Input file pattern (default: *-genotype.txt)",
     )
     ap.add_argument(
         "--overwrite",
         action="store_true",
         default=False,
-        help="既存出力を上書きする（デフォルト: しない）",
+        help="Overwrite existing output (default: no)",
     )
     ap.add_argument(
         "--skip-if-exists",
         action="store_true",
         default=True,
-        help="出力が既に存在し非空ならスキップ（デフォルト: 有効）",
+        help="Skip if output already exists and is non-empty (default: enabled)",
     )
     ap.add_argument(
         "--max-files",
         type=int,
         default=0,
-        help="デバッグ用: 処理する最大ファイル数（0=全て）",
+        help="Debug: max files to process (0=all)",
     )
     args = ap.parse_args()
 

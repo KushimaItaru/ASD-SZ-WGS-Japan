@@ -89,8 +89,6 @@ via environment variables.
 The following variables are **environment-dependent and must be set** before
 running the pipeline:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
 | Variable | Description | How to set |
 |----------|-------------|------------|
 | `PROJECT_ROOT` | Analysis root directory | Auto-detected (repo root) |

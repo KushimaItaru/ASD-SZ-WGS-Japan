@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 # 17_burden_statistical_test_v20.py
 #
-# 処理内容:
-# - v19 per_sampleファイル（observed_clusters_total列を含む）を読み込み、
-#   共変量完備サンプルでburden解析を実施
-# - Primary: rare_any（≥1保有の二値）に対するロジスティック回帰 → OR, 95%CI, P
-#   ※ v19から変更なし
-# - Secondary: rare_outlier_count（カウント）に対するPoisson GLM → RR, 95%CI, P
-#   ※ v20修正: offset=log(observed_clusters_total)を追加
-#   ※ observed_clusters_total=0のサンプルはPoisson GLMから除外（log(0)未定義のため）
-# - 補助: Mann-Whitney U検定（ノンパラメトリック）
-# - ASD vs Healthy, SZ vs Healthy の2比較
-# - 共変量: Sex_M, Depth, PC1-PC10
-# - 実行時間を記録
+# Description:
+# - Load v19 per_sample file (with observed_clusters_total column) and
+#   run burden analysis on covariate-complete samples
+# - Primary: Logistic regression on rare_any (binary, >=1 carrier) -> OR, 95%CI, P
+#   ※ No changes from v19
+# - Secondary: Poisson GLM on rare_outlier_count (count) -> RR, 95%CI, P
+#   ※ v20 fix: added offset=log(observed_clusters_total)
+#   ※ Samples with observed_clusters_total=0 excluded from Poisson GLM (log(0) undefined)
+# - Auxiliary: Mann-Whitney U test (nonparametric)
+# - Two comparisons: ASD vs Healthy, SZ vs Healthy
+# - Covariates: Sex_M, Depth, PC1-PC10
+# - Record execution time
 #
-# v19→v20変更点:
-#   1. 入力ファイルをv19 per_sample（observed_clusters_total列含む）に変更
-#   2. Poisson GLMにoffset=log(observed_clusters_total)を追加
-#   3. observed_clusters_total=0サンプルをPoisson GLMから除外、除外IDをログ出力
-#   4. 出力TSVにexposure関連サマリー列を追加
-#   5. ロジスティック回帰（Primary）は変更なし
+# v19→v20Changes:
+#   1. Changed input file to v19 per_sample (includes observed_clusters_total column)
+#   2. Added offset=log(observed_clusters_total) to Poisson GLM
+#   3. Exclude observed_clusters_total=0 samples from Poisson GLM; log excluded IDs
+#   4. Added exposure summary columns to output TSV
+#   5. No changes to logistic regression (Primary)
 
 import pandas as pd
 import numpy as np
@@ -38,7 +38,7 @@ def main():
     print("=== Poisson GLM now includes offset=log(observed_clusters_total) ===")
     project_root = Path(__file__).resolve().parents[2]
 
-    # v20: v19のper_sampleファイルを入力（observed_clusters_total列を含む）
+    # v20: uses v19 per_sample file as input (includes observed_clusters_total column)
     input_file = Path(os.environ.get("INPUT_TSV", str(
         project_root / "analysis_results_novel" / "outlier_burden_rare_crossfit_v19.per_sample.tsv")))
     output_file = Path(os.environ.get("OUTPUT_TSV", str(
@@ -50,31 +50,31 @@ def main():
     df = pd.read_csv(input_file, sep="\t")
     print(f"[INFO] Loaded {len(df)} samples from {input_file.name}")
 
-    # observed_clusters_total列の存在確認
+    # Verify observed_clusters_total column exists
     if "observed_clusters_total" not in df.columns:
         sys.exit("[ERROR] Column 'observed_clusters_total' not found in input. "
                  "Please use v19 per_sample output as input.")
 
-    # 共変量の定義（列名ベースで動的に選択）
+    # Define covariates (dynamically selected by column name)
     covariates = ["Sex_M", "Depth"] + [f"PC{i}" for i in range(1, 11)]
     missing_cols = [c for c in covariates if c not in df.columns]
     if missing_cols:
         sys.exit(f"[ERROR] Missing covariate columns: {missing_cols}")
 
-    # 解析用データの準備 (3群のみ)
+    # Prepare analysis data (3 groups only)
     df = df[df["Group"].isin(["Healthy", "ASD", "SZ"])].copy()
 
-    # 欠損値除去
+    # Remove missing values
     len_before = len(df)
     required_cols = ["rare_outlier_count", "observed_clusters_total"] + covariates
     df = df.dropna(subset=required_cols)
     if len(df) < len_before:
         print(f"[INFO] Dropped {len_before - len(df)} samples due to missing values.")
 
-    # rare_any（二値エンドポイント）を作成
+    # Create rare_any (binary endpoint)
     df["rare_any"] = (df["rare_outlier_count"] >= 1).astype(int)
 
-    # observed_clusters_totalのサマリーを表示
+    # Display observed_clusters_total summary
     print(f"\n[INFO] observed_clusters_total summary (all groups):")
     print(f"  mean={df['observed_clusters_total'].mean():.1f}, "
           f"median={df['observed_clusters_total'].median():.1f}, "
@@ -83,7 +83,7 @@ def main():
     n_zero_all = (df["observed_clusters_total"] == 0).sum()
     print(f"  N with observed_clusters_total=0: {n_zero_all}")
 
-    # exposure=0サンプルの特定（Poisson GLMから除外対象）
+    # Identify exposure=0 samples (to exclude from Poisson GLM)
     zero_exposure_ids = df.loc[df["observed_clusters_total"] == 0, "SampleID"].tolist()
     if zero_exposure_ids:
         print(f"\n[WARN] {len(zero_exposure_ids)} samples have observed_clusters_total=0 "
@@ -135,7 +135,7 @@ def main():
         row["MWU_P"] = p_mwu
 
         # --- 2. Primary: Logistic Regression on rare_any → OR ---
-        # ※ v19と同一（offsetなし、全サンプル使用）
+        # ※ Same as v19 (no offset, all samples used)
         formula_logit = f"rare_any ~ IsCase + {cov_formula}"
         try:
             model_logit = smf.logit(formula=formula_logit, data=df_sub).fit(
@@ -156,8 +156,8 @@ def main():
             row["Logit_N_used"] = np.nan
 
         # --- 3. Secondary: Poisson GLM on count with offset → RR ---
-        # v20修正: offset=log(observed_clusters_total)を追加
-        # observed_clusters_total=0のサンプルを除外
+        # v20 fix: added offset=log(observed_clusters_total)
+        # Exclude samples with observed_clusters_total=0
         df_pois = df_sub[df_sub["observed_clusters_total"] > 0].copy()
         n_excluded_case = ((df_sub["Group"] == case_grp) & (df_sub["observed_clusters_total"] == 0)).sum()
         n_excluded_ctrl = ((df_sub["Group"] == "Healthy") & (df_sub["observed_clusters_total"] == 0)).sum()
@@ -202,7 +202,7 @@ def main():
 
         results.append(row)
 
-    # 結果保存
+    # Save results
     res_df = pd.DataFrame(results)
     res_df.to_csv(output_file, sep="\t", index=False)
 

@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # 03_ehdn_profile_and_merge.sh
-# ファイル名: 03_ehdn_profile_and_merge.sh
-# 処理内容:
-#   - EHdn プロファイリング + マージの入口ラッパー
-#   - Step 1: EHdn profile（CRAMごとに EHdn 実行、アレイジョブ）
-#   - Step 2: merge（全サンプルの locus.tsv をマージ＆正規化）
-#   - 各ステップは sbatch dependency で連鎖
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 03_ehdn_profile_and_merge.sh
+# Description:
+#   - Entry-point wrapper for EHdn profiling + merge
+#   - Step 1: EHdn profile (run EHdn per CRAM, array job)
+#   - Step 2: merge (merge and normalize locus.tsv from all samples)
+#   - Steps are chained via sbatch dependency
+#   - Record submitted Job IDs in manifest file
 #
-# 前提:
-#   - 02_ehdn_depth.sh が完了していること（depths_all.tsv が存在すること）
+# Prerequisites:
+#   - 02_ehdn_depth.sh must have completed (depths_all.tsv must exist)
 #
-# 使い方:
+# Usage:
 #   bash 03_ehdn_profile_and_merge.sh
 #
-# 注意:
-#   - 既存 helper script の処理内容は一切変更しない
-#   - ARRAY_SIZE placeholder を sed で置換した temp file を submit する
+# Notes:
+#   - Analytical logic in helper scripts is not modified
+#   - Submit temp file with ARRAY_SIZE placeholder replaced via sed
 
 set -euo pipefail
 

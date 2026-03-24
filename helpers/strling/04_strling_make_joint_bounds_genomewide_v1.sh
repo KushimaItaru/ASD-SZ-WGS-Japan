@@ -6,11 +6,11 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 04_strling_make_joint_bounds_genomewide_v1.sh
-# - 処理内容:
-#   - 染色体ごとに作成済みの *-bounds.txt を結合して joint-bounds.txt を作成
-#   - ヘッダを保持し、重複行は sort|uniq で除去
-#   - 生成された joint-bounds.txt の行数（loci数）をログ出力
-# - 実行時間を記録
+# - Description:
+#   - Concatenate per-chromosome *-bounds.txt into joint-bounds.txt
+#   - Retain header and remove duplicate rows via sort|uniq
+#   - Log line count (number of loci) of generated joint-bounds.txt
+# - Record execution time
 
 set -euo pipefail
 START=$(date +%s)
@@ -33,7 +33,7 @@ mkdir -p "${STR_RES_DIR}" "${LOG_DIR}"
 echo "[$(TS)] [INFO] OUT_ROOT=${OUT_ROOT}"
 echo "[$(TS)] [INFO] STR_RES_DIR=${STR_RES_DIR}"
 
-# chr別 bounds の想定ファイル名: ${STR_RES_DIR}/chr1-bounds.txt ... chrY-bounds.txt
+# Expected per-chromosome bounds filename pattern: ${STR_RES_DIR}/chr1-bounds.txt ... chrY-bounds.txt
 shopt -s nullglob
 BOUNDS_FILES=("${STR_RES_DIR}"/chr*-bounds.txt)
 
@@ -49,7 +49,7 @@ JOINT_BOUNDS="${STR_RES_DIR}/joint-bounds.txt"
 TMP_BODY="${STR_RES_DIR}/.tmp_joint_bounds_body.$$"
 TMP_UNIQ="${STR_RES_DIR}/.tmp_joint_bounds_uniq.$$"
 
-# ヘッダは最初のファイルの1行目
+# Header is the first line of the first file
 HEADER=$(head -n 1 "${BOUNDS_FILES[0]}" || true)
 if [ -z "${HEADER}" ]; then
   echo "[$(TS)] [ERROR] Header empty: ${BOUNDS_FILES[0]}" >&2
@@ -62,7 +62,7 @@ for f in "${BOUNDS_FILES[@]}"; do
     echo "[$(TS)] [WARN] Empty bounds file (skip): ${f}" >&2
     continue
   fi
-  # 2行目以降（ボディ）を追記
+  # Append body (line 2 onward)
   tail -n +2 "${f}" >> "${TMP_BODY}" || true
 done
 
@@ -71,8 +71,8 @@ if [ ! -s "${TMP_BODY}" ]; then
   exit 4
 fi
 
-# ソート・重複排除（boundsは概ね: chrom left right repeatunit ...）
-# 4列までで主キーとみなして uniq（完全一致でuniq）
+# Sort and deduplicate (bounds format: chrom left right repeatunit ...)
+# Treat first 4 columns as primary key for uniq (exact match)
 sort -k1,1 -k2,2n -k3,3n -k4,4 "${TMP_BODY}" | uniq > "${TMP_UNIQ}"
 
 {

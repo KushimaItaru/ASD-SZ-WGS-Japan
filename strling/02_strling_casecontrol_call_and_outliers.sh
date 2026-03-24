@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # 02_strling_casecontrol_call_and_outliers.sh
-# ファイル名: 02_strling_casecontrol_call_and_outliers.sh
-# 処理内容:
-#   - STRling genotyping → in-bounds filter → outlier detection の入口ラッパー
-#   - Step 1: call（genic panel上でSTRling call、アレイジョブ）
-#   - Step 2: in-bounds filter（call結果をgenic boundsで絞り込み）
-#   - Step 3: outlier detection（strling-outliers で z-score 算出）
-#   - 各ステップは sbatch dependency で連鎖
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 02_strling_casecontrol_call_and_outliers.sh
+# Description:
+#   - Entry-point wrapper for STRling genotyping -> in-bounds filter -> outlier detection
+#   - Step 1: call (STRling call on genic panel, array job)
+#   - Step 2: in-bounds filter (filter call results by genic bounds)
+#   - Step 3: outlier detection (compute z-scores via strling-outliers)
+#   - Steps are chained via sbatch dependency
+#   - Record submitted Job IDs in manifest file
 #
-# 前提:
-#   - 01_strling_build_panel.sh が完了していること（genic bounds が存在すること）
+# Prerequisites:
+#   - 01_strling_build_panel.sh must have completed (genic bounds must exist)
 #
-# 使い方:
+# Usage:
 #   bash 02_strling_casecontrol_call_and_outliers.sh
 
 set -euo pipefail
@@ -36,7 +36,7 @@ echo "[$(TS)] WRAPPER_ROOT=${WRAPPER_ROOT}" | tee -a "${MANIFEST}"
 echo "[$(TS)] HELPER_DIR=${HELPER_DIR}" | tee -a "${MANIFEST}"
 
 # ---- Step 1: call (array job) ----
-# 06_call は casecontrol_samples.tsv を読むため、そちらからサンプル数を決定
+# 06_call reads casecontrol_samples.tsv, so sample count is determined from it
 CASECONTROL_TSV="${SAMPLE_LIST_CASECONTROL:-${WRAPPER_ROOT}/sample_lists/casecontrol_samples.tsv}"
 N_SAMPLES=$(awk 'END{print NR-1}' "${CASECONTROL_TSV}")
 echo "[$(TS)] [Step1] call: N_SAMPLES=${N_SAMPLES} (from casecontrol_samples.tsv)" | tee -a "${MANIFEST}"

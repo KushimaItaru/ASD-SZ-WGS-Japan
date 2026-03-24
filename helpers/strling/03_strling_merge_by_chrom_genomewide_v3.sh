@@ -6,11 +6,11 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 03_strling_merge_by_chrom_genomewide_v3.sh
-# - STRling extractで作成した bins/*.bin を使い、染色体ごとに strling merge を実行（SLURM array）
-# - Slurm spool 実行でも落ちないよう、config を絶対パスで source
-# - CHROMOSOMES が未定義/非配列でも落ちないように安全に扱う（v3修正点）
-# - 既に出力が存在し中身がある場合はスキップ（再開可能）
-# - 実行時間を記録（/usr/bin/time -v をログへ）
+# - Use bins/*.bin from STRling extract to run strling merge per chromosome (SLURM array)
+# - Source config using absolute path to avoid failure under Slurm spool
+# - Handle CHROMOSOMES safely even if undefined/non-array (v3 fix)
+# - Skip if output already exists and is non-empty (resumable)
+# - Record execution time (/usr/bin/time -v logged)
 
 #SBATCH -J strling_merge_gw
 #SBATCH -p ncbn-cpu
@@ -30,7 +30,7 @@ shopt -s nullglob
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-# ★重要: config を絶対パスで source（Slurm spool でも確実に見つかる）
+# ★Important: Source config using absolute path (reliable under Slurm spool)
 CONFIG="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/helpers/strling/00_strling_genomewide_config_v1.sh"
 if [ ! -f "${CONFIG}" ]; then
   echo "[$(TS)] [ERROR] Config not found: ${CONFIG}" >&2
@@ -39,7 +39,7 @@ fi
 # shellcheck source=/dev/null
 source "${CONFIG}"
 
-# config 側で未定義でも動くように保険
+# Safety fallback in case config leaves it undefined
 OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 BINS_DIR="${BINS_DIR:-${OUT_ROOT}/bins}"
 STR_RES_DIR="${STR_RES_DIR:-${OUT_ROOT}/str-results}"
@@ -47,9 +47,9 @@ LOG_DIR="${LOG_DIR:-${OUT_ROOT}/logs}"
 
 mkdir -p "${STR_RES_DIR}" "${LOG_DIR}"
 
-# ---- 染色体リストを安全に確定（v3修正点） ----
-# 1) CHROMOSOMES が未定義ならデフォルト配列を作る
-# 2) 定義されているが配列でない（文字列）なら空白区切りで配列化する
+# ---- Safely determine chromosome list (v3 fix) ----
+# 1) Create default array if CHROMOSOMES is undefined
+# 2) If defined as string (not array), split by whitespace into array
 if declare -p CHROMOSOMES >/dev/null 2>&1; then
   # defined
   if ! declare -p CHROMOSOMES 2>/dev/null | grep -q 'declare \-a'; then
@@ -65,7 +65,7 @@ else
                chr21 chr22 chrX chrY)
 fi
 
-# 空配列ならデフォルト
+# Use default if array is empty
 if [ "${#CHROMOSOMES[@]}" -eq 0 ]; then
   CHROMOSOMES=(chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 \
                chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 \
@@ -94,7 +94,7 @@ echo "[$(TS)] [INFO] Reference=${REFERENCE_FASTA:-NA}"
 echo "[$(TS)] [INFO] STRLING_BIN=${STRLING_BIN:-strling}"
 echo "[$(TS)] [INFO] Params: WINDOW=${WINDOW:--1} MIN_SUPPORT=${MIN_SUPPORT:-5} MIN_CLIP_TOTAL=${MIN_CLIP_TOTAL:-0} MIN_MAPQ=${MIN_MAPQ:-40}"
 
-# 入力 bin 確認
+# Verify input bins
 if [ ! -d "${BINS_DIR}" ]; then
   echo "[$(TS)] [ERROR] BINS_DIR not found: ${BINS_DIR}" >&2
   exit 2
@@ -108,12 +108,12 @@ if (( N_BIN == 0 )); then
 fi
 echo "[$(TS)] [INFO] Found ${N_BIN} bin files."
 
-# 出力（chrごと）
+# Output (per chromosome)
 OUT_PREFIX="${STR_RES_DIR}/${CHR}"
 OUT_BOUNDS="${OUT_PREFIX}-bounds.txt"
 TIME_LOG="${LOG_DIR}/${CHR}.merge.time.txt"
 
-# 既に出力があればスキップ（再開可能）
+# Skip if output exists (resumable)
 if [ -s "${OUT_BOUNDS}" ]; then
   N_LOCI=$(tail -n +2 "${OUT_BOUNDS}" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
   if [ "${N_LOCI}" -gt 0 ]; then
@@ -124,7 +124,7 @@ if [ -s "${OUT_BOUNDS}" ]; then
   fi
 fi
 
-# merge 実行
+# Execute merge
 echo "[$(TS)] [INFO] Running: strling merge --chromosome ${CHR}"
 set +e
 /usr/bin/time -v -o "${TIME_LOG}" \
@@ -145,7 +145,7 @@ if (( RET != 0 )); then
   exit "${RET}"
 fi
 
-# 出力簡易チェック
+# Quick output check
 if [ -s "${OUT_BOUNDS}" ]; then
   N_LOCI=$(tail -n +2 "${OUT_BOUNDS}" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
   echo "[$(TS)] [DONE] ${OUT_BOUNDS} (loci=${N_LOCI})"

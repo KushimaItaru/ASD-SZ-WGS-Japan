@@ -6,24 +6,24 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 11_strling_outliers_casecontrol_inbounds_v1.sh
-# - 処理内容:
-#   - casecontrol_samples.tsv（9969）を対象に、calls_genic_inbounds の genotype を outliers 作業ディレクトリへ集約
-#   - unplaced は calls_genic から取得し、可能なら in-bounds キー（3471 loci）でフィルタして使用（無ければ空ファイル）
-#   - strling-outliers.py を実行して STRs.tsv と control-file.tsv を生成
-#   - 実行ログ・処理サンプル数・欠損数を記録し、実行時間を記録
+# - Description:
+#   - Aggregate genotypes from calls_genic_inbounds to outliers working directory for casecontrol_samples.tsv
+#   - Retrieve unplaced from calls_genic, filter by in-bounds key (3471 loci) if possible (empty file if missing)
+#   - Run strling-outliers.py to generate STRs.tsv and control-file.tsv
+#   - Record execution log, processed sample count, and missing count; Record execution time
 #
-# 使い方:
-#   Run via the wrapper scripts in the top-level directories
+# Usage:
+#   Run via the top-level wrapper: strling/02_strling_casecontrol_call_and_outliers.sh
 #
-# 出力:
+# Output:
 #   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/STRs.tsv
 #   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/control-file.tsv
 #   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/outliers_run.log
 #   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/summary.txt
 #
-# 注意:
-# - genotype は in-bounds のみに揃え済み（calls_genic_inbounds）を使います（OUT_OF_BOUNDSを主解析から除外）
-# - unplaced も可能なら in-bounds でフィルタします（フォーマットが想定と違う場合はそのままコピー/空で代替）
+# Notes:
+# - Genotypes are pre-filtered to in-bounds only (calls_genic_inbounds); OUT_OF_BOUNDS excluded from main analysis
+# - unplaced is also filtered by in-bounds if possible (copy as-is or use empty file if format differs)
 
 #SBATCH -J strling_outliers_inb
 #SBATCH -p ncbn-cpu
@@ -47,10 +47,10 @@ LOG_DIR="${OUT_ROOT}/logs"
 WORK_DIR="${OUT_ROOT}/outliers_casecontrol_inbounds_v1"
 LINK_DIR="${WORK_DIR}/links"
 
-# 入力
+# Input
 CASECONTROL_TSV="${PROJECT_ROOT}/sample_lists/casecontrol_samples.tsv"
 GENO_IN_DIR="${OUT_ROOT}/calls_genic_inbounds"     # in-bounds genotype
-UNPLACED_DIR="${OUT_ROOT}/calls_genic"             # 元の unplaced（必要に応じてフィルタして使う）
+UNPLACED_DIR="${OUT_ROOT}/calls_genic"             # Original unplaced (filtered as needed)
 BOUNDS="${OUT_ROOT}/str-results/joint-bounds.genic_1kbpad.len3_8.txt"
 
 mkdir -p "${LOG_DIR}" "${WORK_DIR}" "${LINK_DIR}"
@@ -81,17 +81,17 @@ if [ ! -f "${BOUNDS}" ]; then
   exit 3
 fi
 
-# in-bounds key を作成（chr,left,right,repeatunit）
+# Create in-bounds key (chr,left,right,repeatunit)
 KEYS="${WORK_DIR}/inbounds_3471.keys.tsv"
 tail -n +2 "${BOUNDS}" | awk -F'\t' 'BEGIN{OFS="\t"}{print $1,$2,$3,$4}' > "${KEYS}"
 NKEYS=$(wc -l < "${KEYS}" | tr -d ' ')
 echo "[$(TS)] [INFO] IN_BOUNDS keys: ${NKEYS}"
 
-# 作業ディレクトリを一旦きれいに（再実行時の混乱回避）
-# ※巨大ファイルは無いはずだが、リンク数が多いので “中身だけ” を削除
+# Clean working directory (avoid confusion on re-run)
+# Large files should be Missing, but delete only the contents since there are many links
 rm -f "${LINK_DIR}"/*-genotype.txt "${LINK_DIR}"/*-unplaced.txt "${LINK_DIR}"/STRs.tsv "${LINK_DIR}"/control-file.tsv "${LINK_DIR}"/outliers_run.log 2>/dev/null || true
 
-# casecontrol の SampleID を抽出
+# Extract SampleID from casecontrol list
 SIDS=$(awk -F'\t' 'NR>1{print $1}' "${CASECONTROL_TSV}" | sort -u)
 
 N_TOTAL=0
@@ -113,19 +113,19 @@ for sid in ${SIDS}; do
     ln -sf "${g_in}" "${g_link}"
     N_GENO_OK=$((N_GENO_OK+1))
   else
-    # genotype が無い/空なら、このサンプルは outliers 入力に入れない（解析母集団を崩さない）
+    # If genotype is Missing/empty, exclude this sample from outliers input (preserve analysis population)
     N_GENO_MISSING=$((N_GENO_MISSING+1))
     continue
   fi
 
-  # unplaced の扱い：
-  # - 元ファイルが存在すれば in-bounds キーでフィルタを試みる（フォーマットが違えばコピー）
-  # - 無ければ空ファイルを作る（outliersが落ちないように）
+  # Handle unplaced:
+  # - If source file exists, attempt in-bounds key filter (copy if format differs)
+  # - Create empty file if missing (prevent outliers from failing)
   u_in="${UNPLACED_DIR}/${sid}-unplaced.txt"
   u_out="${LINK_DIR}/${sid}-unplaced.txt"
 
   if [ -s "${u_in}" ]; then
-    # ヘッダが #chrom で始まるなら、4列キーでフィルタして整合させる
+    # If header starts with #chrom, filter by 4-column key for consistency
     first=$(head -n 1 "${u_in}" || true)
     if echo "${first}" | grep -q '^#chrom'; then
       awk -F'\t' '
@@ -136,16 +136,16 @@ for sid in ${SIDS}; do
       ' "${KEYS}" "${u_in}" > "${u_out}"
       N_UNPLACED_OK=$((N_UNPLACED_OK+1))
     else
-      # 形式不明ならそのままコピー（安全側）
+      # Copy as-is if format is unknown (safe fallback)
       cp -f "${u_in}" "${u_out}"
       N_UNPLACED_OK=$((N_UNPLACED_OK+1))
     fi
   elif [ -f "${u_in}" ]; then
-    # ファイルはあるが空
+    # File exists but is empty
     : > "${u_out}"
     N_UNPLACED_EMPTY=$((N_UNPLACED_EMPTY+1))
   else
-    # 無い
+    # Missing
     : > "${u_out}"
     N_UNPLACED_MISSING=$((N_UNPLACED_MISSING+1))
   fi
@@ -155,10 +155,10 @@ echo "[$(TS)] [INFO] N_TOTAL(casecontrol unique)=${N_TOTAL}"
 echo "[$(TS)] [INFO] genotype: OK=${N_GENO_OK} MISSING/EMPTY=${N_GENO_MISSING}"
 echo "[$(TS)] [INFO] unplaced: OK=${N_UNPLACED_OK} EMPTY=${N_UNPLACED_EMPTY} MISSING=${N_UNPLACED_MISSING}"
 
-# outliers 実行
+# Run outliers
 cd "${LINK_DIR}"
 
-# 入力が少なすぎる場合は中断
+# Abort if input count is too low
 N_GENO_FILES=$(ls -1 *-genotype.txt 2>/dev/null | wc -l | tr -d ' ')
 if [ "${N_GENO_FILES}" -lt 100 ]; then
   echo "[$(TS)] [ERROR] Too few genotype files in ${LINK_DIR}: ${N_GENO_FILES}" >&2

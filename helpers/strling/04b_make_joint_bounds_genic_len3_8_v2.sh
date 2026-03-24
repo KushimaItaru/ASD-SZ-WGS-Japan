@@ -6,19 +6,18 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 04b_make_joint_bounds_genic_len3_8_v2.sh
-# - 処理内容:
-#   - joint-bounds.txt（genome-wide）から gene_regions_1kb_pad.bed と重なる locus のみ抽出（genic 1kbpad）
-#   - repeat（4列目）の長さを 3–8bp に制限（EHdnのmin/max unit lenに合わせる）
-#   - sort/uniq で出力を安定化（再現性向上）
-#   - 出力: joint-bounds.genic_1kbpad.len3_8.txt
-#   - loci数（GW / GENIC_LEN3_8）をログに記録
-#   - 実行時間を記録
+# - Description:
+#   - Extract loci overlapping gene_regions_1kb_pad.bed from genome-wide joint-bounds.txt (genic 1kb padded)
+#   - Restrict repeat (4th column) length to 3-8 bp (matching EHdn min/max unit length)
+#   - Stabilize output via sort/uniq (for reproducibility)
+#   - Output: joint-bounds.genic_1kbpad.len3_8.txt
+#   - Log loci counts (GW / GENIC_LEN3_8)
+#   - Record execution time
 #
-# 使い方:
-#   cd <repo_root>/helpers/strling
-#   bash 04b_make_joint_bounds_genic_len3_8_v2.sh
+# Usage:
+#   Run via the top-level wrapper: strling/01_strling_build_panel.sh
 #
-# 環境変数で上書き可能:
+# Overridable via environment variables:
 #   JOINT=/path/to/joint-bounds.txt
 #   GENE=/path/to/gene_regions_1kb_pad.bed
 #   OUT=/path/to/joint-bounds.genic_1kbpad.len3_8.txt
@@ -67,7 +66,7 @@ if [ ! -s "${GENE}" ]; then
   exit 3
 fi
 
-# header sanity (期待: #chrom left right repeat ...)
+# Header sanity check (expected: #chrom left right repeat ...)
 HDR=$(head -n 1 "${JOINT}" || true)
 echo "[$(TS)] [INFO] JOINT header: ${HDR}" | tee -a "${LOG}"
 if ! echo "${HDR}" | awk -F'\t' '($1 ~ /chrom/ || $1 ~ /#chrom/) && $2=="left" && $3=="right" {exit 0} {exit 1}'; then

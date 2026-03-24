@@ -6,25 +6,25 @@
 # (e.g. SAMPLE_INFO, PCA_EIGENVEC, CRAM_BASE_DIR1, CRAM_BASE_DIR2).
 # ============================================================================
 """
-ehdn/01_prepare_sample_lists_v2.py（v2）
+ehdn/01_prepare_sample_lists_v2.py (v2)
 
-処理内容:
-- SampleInfo（TSV）から列名ベースで SampleID / Diagnosis / Father / Mother を自動検出
-- CRAMパスを2つのベースディレクトリから探索し、存在するサンプルのみ採用
-- 用途別にサンプルリストを分離して出力：
-  1) EHdn実行・深度計算・マージ対象（ケース + Healthy + family_member）
+Description:
+- Auto-detect SampleID / Diagnosis / Father / Mother columns by header name from SampleInfo (TSV)
+- Search 2 base directories for CRAM paths and include only samples with existing CRAMs
+- Generate purpose-specific sample lists:
+  1) EHdn profiling / depth / merge targets (cases + Healthy + family_member)
      -> sample_lists/ehdn_all_samples.tsv
-  2) case-control burden解析対象（ケース + Diagnosis=="Healthy" のみ）
+  2) Case-control burden analysis targets (cases + Diagnosis=="Healthy" only)
      -> sample_lists/casecontrol_samples.tsv
-  3) de novo/trio解析用（proband と父母のリンク、および必要個体のリスト）
+  3) De novo/trio analysis (proband-parent links and required individual list)
      -> sample_lists/trio_links.tsv, sample_lists/trio_samples.tsv
-- 実行時間を記録
+- Record execution time
 
-注意:
-- case-controlのcontrolsは Diagnosis=="Healthy" のみ（family_memberは除外）
-- EHdnプロファイル作成では family_member も含める（de novo用に必要）
+Notes:
+- Case-control controls are Diagnosis=="Healthy" only (family_member excluded)
+- family_member samples are included in EHdn profiling (needed for de novo analysis)
 
-使い方:
+Usage:
   Run via the top-level wrapper: ehdn/01_ehdn_setup_and_sample_lists.sh
 """
 
@@ -56,10 +56,10 @@ def find_col(df: pd.DataFrame, candidates: list[str], required: bool = True) -> 
 
 def parse_parent_columns(df: pd.DataFrame) -> tuple[pd.Series, pd.Series] | tuple[None, None]:
     """
-    Father/Mother の列名揺れに対応：
+    Handle column name variations for Father/Mother:
     - Father, Mother
     - FatherID, MotherID
-    - Father:Mother（結合列）
+    - Father:Mother (combined column)
     """
     cols = set(df.columns)
 
@@ -121,15 +121,15 @@ def main() -> None:
     df[col_sid] = df[col_sid].astype(str)
     df[col_dx] = df[col_dx].astype(str)
 
-    # Parent columns（なければ trio 出力はスキップ）
+    # Parent columns (skip trio output if missing)
     father_col, mother_col = parse_parent_columns(df)
 
-    # Groupの基本分類（Diagnosisの値をそのまま保持しつつ、用途別に使い分け）
-    # - casecontrol controls: dx=="Healthy" のみ
-    # - family_member は casecontrol から除外、ただし EHdn 実行対象としては含める
+    # Basic Group classification (keep Diagnosis values as-is, split by purpose)
+    # - casecontrol controls: dx=="Healthy" only
+    # - family_member excluded from casecontrol but included in EHdn profiling targets
     df["Diagnosis_norm"] = df[col_dx].astype(str).str.strip()
 
-    # CRAM探索（存在するもののみ）
+    # Search CRAMs (include only existing ones)
     print(f"[{ts()}] [INFO] Finding CRAM paths for {len(df)} rows in SampleInfo...")
     df["CRAM_Path"] = df[col_sid].apply(lambda s: find_cram(str(s), base1, base2))
     df["CRAM_Exists"] = df["CRAM_Path"].notna()
@@ -140,33 +140,33 @@ def main() -> None:
 
     df = df[df["CRAM_Exists"]].copy()
 
-    # ---------- EHdn実行対象（プロファイル生成用） ----------
-    # ASD / SZ / Healthy / family_member を含める
+    # ---------- EHdn profiling targets ----------
+    # Include ASD / SZ / Healthy / family_member
     ehdn_keep = df["Diagnosis_norm"].isin(["ASD", "SZ", "Healthy", "family_member"])
     df_ehdn = df[ehdn_keep].copy()
     df_ehdn_out = df_ehdn[[col_sid, "Diagnosis_norm", "CRAM_Path"]].rename(columns={col_sid: "SampleID"})
-    df_ehdn_out = df_ehdn_out.rename(columns={"Diagnosis_norm": "Group"})  # Group列にASD/SZ/Healthy/family_member
+    df_ehdn_out = df_ehdn_out.rename(columns={"Diagnosis_norm": "Group"})  # Rename to Group column (ASD/SZ/Healthy/family_member
     df_ehdn_out = df_ehdn_out.drop_duplicates(subset=["SampleID"])
 
     ehdn_file = out_dir / "ehdn_all_samples.tsv"
     df_ehdn_out.to_csv(ehdn_file, sep="\t", index=False)
     print(f"[{ts()}] [INFO] Wrote {ehdn_file} (n={len(df_ehdn_out)})")
 
-    # ---------- case-control対象（burden解析用） ----------
+    # ---------- Case-control targets (for burden analysis) ----------
     # cases: ASD/SZ
-    # controls: Diagnosis=="Healthy" のみ（family_member除外）
+    # controls: Diagnosis=="Healthy" only (family_member excluded)
     cc_keep = df["Diagnosis_norm"].isin(["ASD", "SZ", "Healthy"])
     df_cc = df[cc_keep].copy()
     df_cc_out = df_cc[[col_sid, "Diagnosis_norm", "CRAM_Path"]].rename(columns={col_sid: "SampleID"})
-    df_cc_out = df_cc_out.rename(columns={"Diagnosis_norm": "Group"})  # Group列にASD/SZ/Healthyのみ
+    df_cc_out = df_cc_out.rename(columns={"Diagnosis_norm": "Group"})  # Rename to Group column (ASD/SZ/Healthy only)
     df_cc_out = df_cc_out.drop_duplicates(subset=["SampleID"])
 
     cc_file = out_dir / "casecontrol_samples.tsv"
     df_cc_out.to_csv(cc_file, sep="\t", index=False)
     print(f"[{ts()}] [INFO] Wrote {cc_file} (n={len(df_cc_out)})")
 
-    # ---------- trio（de novo）用 ----------
-    # proband は ASD または SZ のみを対象（必要に応じて拡張可能）
+    # ---------- Trio (de novo) targets ----------
+    # Probands are ASD or SZ only (extensible if needed)
     trio_links_file = out_dir / "trio_links.tsv"
     trio_samples_file = out_dir / "trio_samples.tsv"
 
@@ -179,11 +179,11 @@ def main() -> None:
 
         probands = df_tmp[df_tmp["Diagnosis_norm"].isin(["ASD", "SZ"])].copy()
         probands = probands[[col_sid, "Diagnosis_norm", "FatherID", "MotherID"]].rename(columns={col_sid: "ProbandID"})
-        # 欠損IDの正規化
+        # Normalize missing IDs
         for c in ["FatherID", "MotherID"]:
             probands[c] = probands[c].astype(str).replace({"nan": "NA", "": "NA", ".": "NA"})
 
-        # CRAM存在しているID集合
+        # Set of IDs with existing CRAMs
         available = set(df[col_sid].astype(str).tolist())
 
         def ok_id(x: str) -> bool:
@@ -195,7 +195,7 @@ def main() -> None:
         probands.to_csv(trio_links_file, sep="\t", index=False)
         print(f"[{ts()}] [INFO] Wrote {trio_links_file} (n_probands={len(probands)})")
 
-        # trio_samples = proband + father + mother（CRAMありのみ）
+        # trio_samples = proband + father + mother (CRAMs exist only)
         trio_ids = set()
         for r in probands.itertuples(index=False):
             trio_ids.add(str(r.ProbandID))

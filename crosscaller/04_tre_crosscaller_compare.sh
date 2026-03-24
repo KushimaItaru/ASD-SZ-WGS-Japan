@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # 04_tre_crosscaller_compare.sh
-# ファイル名: 04_tre_crosscaller_compare.sh
-# 処理内容:
-#   - EHdn / STRling の case-case 比較（ASD vs SZ）の入口ラッパー
-#   - Step 1: case-case comparison（EHdn v19 + STRling v9 の per_sample を読み込み、
-#             Logistic + Poisson + heterogeneity test を実施）
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 04_tre_crosscaller_compare.sh
+# Description:
+#   - Entry-point wrapper for EHdn / STRling case-case comparison (ASD vs SZ)
+#   - Step 1: case-case comparison (load EHdn v19 + STRling v9 per_sample,
+#             run Logistic + Poisson + heterogeneity test)
+#   - Record submitted Job IDs in manifest file
 #
-# 前提:
-#   - EHdn burden (v19) と STRling burden (v9) が完了していること
-#     （per_sample.tsv が存在すること）
+# Prerequisites:
+#   - EHdn burden (v19) and STRling burden (v9) must have completed
+#     (per_sample.tsv must exist)
 #
-# 使い方:
+# Usage:
 #   bash 04_tre_crosscaller_compare.sh
 
 set -euo pipefail

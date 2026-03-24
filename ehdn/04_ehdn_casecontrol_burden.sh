@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 # 04_ehdn_casecontrol_burden.sh
-# ファイル名: 04_ehdn_casecontrol_burden.sh
-# 処理内容:
-#   - EHdn burden 解析の入口ラッパー
-#   - Step 1: 5-fold cross-fitted rare TRE burden 解析
+# Filename: 04_ehdn_casecontrol_burden.sh
+# Description:
+#   - Entry-point wrapper for EHdn burden analysis
+#   - Step 1: 5-fold cross-fitted rare TRE burden analysis
 #   - Step 2: burden statistical test
-#             （logistic OR, Poisson RR with offset=log(observed_clusters_total),
-#               Mann–Whitney U test）
-#   - 各ステップは sbatch dependency で連鎖
-#   - 投入した Job ID を manifest ファイルに記録
+#             (logistic OR, Poisson RR with offset=log(observed_clusters_total),
+#              Mann-Whitney U test)
+#   - Steps are chained via sbatch dependency
+#   - Submitted Job IDs are recorded in a manifest file
 #
-# 前提:
-#   - 03_ehdn_profile_and_merge.sh が完了していること
-#     （novel_loci_genic_norm.tsv が存在すること）
+# Prerequisites:
+#   - 03_ehdn_profile_and_merge.sh must have completed
+#     (novel_loci_genic_norm.tsv must exist)
 #
-# 使い方:
-#   bash 04_ehdn_casecontrol_burden.sh
+# Usage:
+#   bash ehdn/04_ehdn_casecontrol_burden.sh
 #
-# 注意:
-#   - 既存 helper script の処理内容は一切変更しない
-#   - 15_annotate_genes / 16_gene_significance_test は主解析ラインに含めない
-#     （exploratory / legacy utility）
+# Notes:
+#   - Analytical logic in helper scripts is not modified
+#   - 15_annotate_genes / 16_gene_significance_test are not part of the
+#     main analysis path (exploratory / legacy utility)
 
 set -euo pipefail
 

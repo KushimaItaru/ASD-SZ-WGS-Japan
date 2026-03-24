@@ -6,13 +6,13 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 06_strling_call_array_genic_v1.sh
-# - 処理内容:
-#   - casecontrol_samples.tsv（Healthy/ASD/SZ）を対象に、genic+repeatunit(3–8bp)の joint-bounds を用いて strling call を実行
-#   - 入力: CRAM + bins/<SampleID>.bin + joint-bounds.genic_1kbpad.len3_8.txt
-#   - 出力: calls_genic/<SampleID>-genotype.txt, calls_genic/<SampleID>-unplaced.txt, calls_genic/<SampleID>-bounds.txt
-#   - 既に genotype/unplaced があればスキップ（再開可能）
-#   - /usr/bin/time -v を ${LOG_DIR}/${SampleID}.call_genic.time.txt に保存（MaxRSS 等を後で集計可能）
-#   - 実行時間（秒）をログ出力
+# - Description:
+#   - Run STRling call on casecontrol_samples.tsv (Healthy/ASD/SZ) using genic+repeatunit(3-8bp) joint-bounds
+#   - Input: CRAM + bins/<SampleID>.bin + joint-bounds.genic_1kbpad.len3_8.txt
+#   - Output: calls_genic/<SampleID>-genotype.txt, calls_genic/<SampleID>-unplaced.txt, calls_genic/<SampleID>-bounds.txt
+#   - Skip if genotype/unplaced already exist (resumable)
+#   - Save /usr/bin/time -v to ${LOG_DIR}/${SampleID}.call_genic.time.txt (for later MaxRSS analysis)
+#   - Log execution time (seconds)
 
 #SBATCH -J strling_call_genic
 #SBATCH -p ncbn-cpu
@@ -47,16 +47,16 @@ STR_RES_DIR="${STR_RES_DIR:-${OUT_ROOT}/str-results}"
 CALL_DIR="${OUT_ROOT}/calls_genic"
 LOG_DIR="${LOG_DIR:-${OUT_ROOT}/logs}"
 
-# case-control のみに限定（EHdn再確認目的）
+# Restrict to case-control only (EHdn verification)
 SAMPLES_TSV="${PROJECT_ROOT}/sample_lists/casecontrol_samples.tsv"
 
-# configに無い場合のフォールバック
+# Fallback if not defined in config
 STRLING_BIN="${STRLING_BIN:-strling}"
 REFERENCE_FASTA="${REFERENCE_FASTA:-/lustre12/home/grifinpd-pg/resource_2020Aug/Homo_sapiens_assembly38.fasta}"  # CONFIGURE
 
 mkdir -p "${CALL_DIR}" "${LOG_DIR}"
 
-# ★EHdnに合わせて repeat unit 3–8bp のみに絞った genic joint-bounds を使用
+# ★Use genic joint-bounds restricted to repeat unit 3-8 bp (matching EHdn)
 JOINT_BOUNDS="${STR_RES_DIR}/joint-bounds.genic_1kbpad.len3_8.txt"
 if [ ! -s "${JOINT_BOUNDS}" ]; then
   echo "[$(TS)] [ERROR] genic len3_8 joint-bounds not found/empty: ${JOINT_BOUNDS}" >&2
@@ -72,7 +72,7 @@ fi
 TASK_ID="${SLURM_ARRAY_TASK_ID:?}"
 LINE=$((TASK_ID + 1))
 
-# 列名ベースで SampleID / Group / CRAM列を自動検出して該当行を抽出
+# Auto-detect SampleID / Group / CRAM columns by header name and extract target row
 REC=$(awk -F'\t' -v line="${LINE}" '
   NR==1{
     for(i=1;i<=NF;i++){
@@ -114,7 +114,7 @@ echo "[$(TS)] [INFO] BIN=${BIN}"
 echo "[$(TS)] [INFO] JOINT_BOUNDS=${JOINT_BOUNDS}"
 echo "[$(TS)] [INFO] OUT_PREFIX=${OUT_PREFIX}"
 
-# 既に genotype/unplaced があればスキップ（再開可能）
+# Skip if genotype/unplaced already exist (resumable)
 if [ -s "${OUT_GENOTYPE}" ] && [ -s "${OUT_UNPLACED}" ]; then
   echo "[$(TS)] [INFO] Already exists -> skip: ${OUT_GENOTYPE}"
   END=$(date +%s)
@@ -127,7 +127,7 @@ if [ ! -f "${CRAM_PATH}" ]; then
   exit 5
 fi
 
-# CRAI確認
+# Verify CRAI
 if [ ! -f "${CRAM_PATH}.crai" ]; then
   echo "[$(TS)] [INFO] Creating CRAM index..."
   samtools index "${CRAM_PATH}"
@@ -138,7 +138,7 @@ if [ ! -s "${BIN}" ]; then
   exit 6
 fi
 
-# 前回途中で 0 byte が残っている場合に備え、開始前に消す（再開時の混乱回避）
+# Remove leftover 0-byte files from previous runs (avoid confusion on restart)
 rm -f "${OUT_GENOTYPE}" "${OUT_UNPLACED}" "${OUT_BOUNDS}" "${TIME_LOG}"
 
 echo "[$(TS)] [INFO] Running: strling call (genic len3_8 bounds)"
@@ -158,20 +158,20 @@ if (( RET != 0 )); then
   exit "${RET}"
 fi
 
-# 出力チェック
+# Output check
 if [ ! -s "${OUT_GENOTYPE}" ]; then
   echo "[$(TS)] [ERROR] genotype not generated or empty: ${OUT_GENOTYPE}" >&2
   exit 7
 fi
-# unplaced は空のことがあり得るが、ファイル自体が無ければ警告
+# unplaced may be empty, but warn if file is missing entirely
 if [ ! -f "${OUT_UNPLACED}" ]; then
   echo "[$(TS)] [WARN] unplaced missing: ${OUT_UNPLACED}" >&2
 fi
-# bounds は通常出る。無ければ警告
+# bounds normally produced; warn if missing
 if [ ! -f "${OUT_BOUNDS}" ]; then
   echo "[$(TS)] [WARN] bounds missing: ${OUT_BOUNDS}" >&2
 fi
-# time log は必須（mem最適化に使う）
+# time log is required (used for memory optimization)
 if [ ! -s "${TIME_LOG}" ]; then
   echo "[$(TS)] [WARN] time log missing/empty: ${TIME_LOG}" >&2
 fi

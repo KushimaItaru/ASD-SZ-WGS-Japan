@@ -6,13 +6,13 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # strling/00_strling_genomewide_config_v1.sh
-# - STRling（genome-wide）の出力ディレクトリや参照、サンプルリストを集中管理
-# - デフォルトのサンプルリストを ehdn_all_samples.tsv（family_member含む）に設定
-# - 実行環境（conda/strling）や merge の染色体リストを定義
+# - Centralized management of output directories, references, and sample lists for STRling (genome-wide)
+# - Default sample list set to ehdn_all_samples.tsv (including family_member)
+# - Define runtime environment (conda/strling) and chromosome list for merge
 
 set -euo pipefail
 
-# ---- Project root（固定）----
+# ---- Project root (fixed)----
 export PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "${PROJECT_ROOT}/config_v1.sh"
 
@@ -22,10 +22,10 @@ export STRLING_CONDA_ENV="strling_env"
 export STRLING_BIN="${STRLING_BIN:-strling}"
 
 # ---- Input sample list ----
-# ★デフォルト：family_member を含める（EHdnと同じ）
+# ★Default: include family_member (same as EHdn)
 export STRLING_SAMPLES_TSV="${SAMPLE_LIST_DIR}/ehdn_all_samples.tsv"
 
-# case-control only にしたい場合は下を使う（手動で切替）
+# Use below for case-control only (manual switch)
 # export STRLING_SAMPLES_TSV="${SAMPLE_LIST_DIR}/casecontrol_samples.tsv"
 
 # ---- Output dirs (within this project) ----
@@ -64,11 +64,11 @@ export STRLING_EXTRACT_MAXPAR="40"
 export STRLING_MERGE_CPUS="1"
 export STRLING_MERGE_MEM="128G"
 export STRLING_MERGE_TIME="24:00:00"
-export STRLING_MERGE_MAXPAR="24"   # chrごと array=1-24
+export STRLING_MERGE_MAXPAR="24"   # per chr, array=1-24
 
 # ---- Downstream alias (config → downstream variable names) ----
-# 下流スクリプトが STRLING_ prefix なしの変数名を参照しているため、
-# 互換性のためにaliasをexportする。
+# Downstream scripts reference variable names without STRLING_ prefix,
+# so export aliases for compatibility.
 export OUT_ROOT="${STRLING_OUT_ROOT}"
 export BINS_DIR="${STRLING_BINS_DIR}"
 export STR_RES_DIR="${STRLING_RES_DIR}"

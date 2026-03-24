@@ -1,17 +1,17 @@
 #!/bin/bash
 # config_v1.sh
-# - プロジェクト全体のパス・共通パラメータを集中管理
+# - Central configuration for project paths and shared parameters
 #
-# 環境変数で上書き可能なパスにはデフォルト値を設定しています。
-# 実行環境に合わせて export してから source してください。
+# Paths with defaults can be overridden via environment variables.
+# Export the relevant variables before sourcing this file.
 
 set -euo pipefail
 
 # ===== Project root =====
-# このファイルは <PROJECT_ROOT>/config_v1.sh を想定
+# This file is expected at <PROJECT_ROOT>/config_v1.sh
 export PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ===== Common directories (created by setup) =====
+# ===== Common directories (created during setup) =====
 export RES_DIR="${PROJECT_ROOT}/resources"
 export WORK_DIR="${PROJECT_ROOT}/work"
 export LOG_DIR="${PROJECT_ROOT}/logs"
@@ -22,10 +22,10 @@ export MERGED_NOVEL_DIR="${PROJECT_ROOT}/merged_results_novel"
 export ANALYSIS_NOVEL_DIR="${PROJECT_ROOT}/analysis_results_novel"
 
 # ===== Input metadata =====
-# SAMPLE_INFO: サンプルメタデータファイルへのパス（環境変数で上書き可能）
+# SAMPLE_INFO: Path to sample metadata file (overridable via env var)
 export SAMPLE_INFO="${SAMPLE_INFO:-/path/to/GRIFIN_srWGS_SampleInfo.txt}"
 
-# ===== CRAM base dirs (優先順に探索) =====
+# ===== CRAM base dirs (searched in priority order) =====
 export CRAM_BASE_DIR1="${CRAM_BASE_DIR1:-/path/to/cram/case}"
 export CRAM_BASE_DIR2="${CRAM_BASE_DIR2:-/path/to/cram/control}"
 
@@ -39,17 +39,17 @@ export EHDN_MAX_IRR_MAPQ="40"
 export EHDN_MIN_UNIT_LEN="3"
 export EHDN_MAX_UNIT_LEN="8"
 
-# ===== STRling（本burden解析では depth 計算のみ使用） =====
+# ===== STRling (only depth computation is used in burden analysis) =====
 export DEPTH_DIR="${PROJECT_ROOT}/depth"
 export DEPTH_PARTS_DIR="${DEPTH_DIR}/depth_parts"
 export DEPTHS_ALL_TSV="${DEPTH_DIR}/depths_all.tsv"
 
-# 深度の概算式の read length（srWGSで 151bp を想定）
+# Read length for depth estimation (assuming 151 bp for srWGS)
 export READ_LENGTH_BP="151"
 export GENOME_SIZE_BP="3100000000"
 
 # ===== Gene regions BED =====
-# setupで resources/gene_regions_1kb_pad.bed を用意する想定
+# Expected to be created by setup in resources/gene_regions_1kb_pad.bed
 export GENE_REGIONS_BED="${RES_DIR}/gene_regions_1kb_pad.bed"
 
 # ===== Normalization =====

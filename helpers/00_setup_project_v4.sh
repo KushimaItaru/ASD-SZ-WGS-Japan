@@ -6,11 +6,11 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # 00_setup_project_v4.sh
-# - 必要なディレクトリ（sample_lists, logs, outputs, resources等）を作成
-# - gene_regions_1kb_pad.bed を既存場所からコピー/シンボリックリンク（必要ならパス変更）
-# - 実行時間を記録
-# v2→v3 変更点: Next steps の array job 案内を修正（ARRAY_SIZE 未置換注意）
-# v3→v4 変更点: sed 置換例を実際の helper script のプレースホルダに合わせて修正
+# - Create required directories (sample_lists, logs, outputs, resources, etc.)
+# - Copy/symlink gene_regions_1kb_pad.bed from existing location (update path if needed)
+# - Record execution time
+# v2->v3: Updated Next steps for array job guidance (ARRAY_SIZE replacement note)
+# v3→v4 Changes: Updated sed examples to match actual helper script placeholders
 
 set -euo pipefail
 
@@ -27,11 +27,11 @@ mkdir -p "${SAMPLE_LIST_DIR}" "${EHDN_OUT_DIR}" "${MERGED_NOVEL_DIR}" "${ANALYSI
 mkdir -p "${DEPTH_DIR}" "${DEPTH_PARTS_DIR}"
 mkdir -p "${LOG_DIR}/ehdn" "${LOG_DIR}/depth" "${LOG_DIR}/merge" "${LOG_DIR}/burden"
 
-# gene_regions BED の準備
+# Prepare gene regions BED
 if [ -f "${GENE_REGIONS_BED}" ]; then
   echo "[$(TS)] [INFO] Gene BED exists: ${GENE_REGIONS_BED}"
 else
-  # 既存プロジェクトからコピー（必要ならここを編集）
+  # Copy from existing project (edit here if needed)
   SRC1="/lustre12/home/kushima-pg/ehdn_knownSTR_10302025/gene_regions_1kb_pad.bed"  # CONFIGURE
   SRC2="/lustre12/home/kushima-pg/strling_knownSTR_11222025/gene_regions_1kb_pad.bed"  # CONFIGURE
   if [ -f "${SRC1}" ]; then
@@ -47,7 +47,7 @@ else
   fi
 fi
 
-# tool checks（存在確認のみ）
+# Tool checks (existence verification only)
 command -v samtools >/dev/null 2>&1 || { echo "[$(TS)] [ERROR] samtools not found in PATH"; exit 2; }
 command -v bedtools >/dev/null 2>&1 || { echo "[$(TS)] [ERROR] bedtools not found in PATH"; exit 2; }
 

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # 01_ehdn_setup_and_sample_lists.sh
-# ファイル名: 01_ehdn_setup_and_sample_lists.sh
-# 処理内容:
-#   - EHdn パイプラインの初期セットアップ入口ラッパー
-#   - Step 1: setup（ディレクトリ作成、リソース確認）
-#   - Step 2: sample list 作成（SampleInfo → 用途別サンプルリスト分離）
-#   - 各ステップは sbatch dependency で連鎖し、前段完了後に次段を開始
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 01_ehdn_setup_and_sample_lists.sh
+# Description:
+#   - Entry-point wrapper for EHdn pipeline initial setup
+#   - Step 1: setup (create directories, verify resources)
+#   - Step 2: sample list generation (SampleInfo -> purpose-specific sample lists)
+#   - Steps are chained via sbatch dependency; each starts after the previous completes
+#   - Record submitted Job IDs in manifest file
 #
-# 使い方:
+# Usage:
 #   bash 01_ehdn_setup_and_sample_lists.sh
 #
-# 注意:
-#   - 既存 helper script の処理内容は一切変更しない
+# Notes:
+#   - Analytical logic in helper scripts is not modified
 
 set -euo pipefail
 

@@ -2,20 +2,20 @@
 """
 ehdn/04_merge_ehdn_novel_norm_v2.py
 
-処理内容:
-- EHdn profile の locus.tsv を全サンプルから読み込み
-- gene_regions_1kb_pad.bed で genic に限定
-- depths_all.tsv による深度正規化（TARGET_DEPTH=40x）
-- 出力:
+Description:
+- Load EHdn profile locus.tsv from all samples
+- Filter to genic regions using gene_regions_1kb_pad.bed
+- Depth normalization using depths_all.tsv (TARGET_DEPTH=40x)
+- Output:
   merged_results_novel/novel_loci_genic_norm.tsv
   skipped_samples_depth_missing.log
-- 実行時間を記録
+- Record execution time
 
-入力（環境変数 or 既定）:
-- EHDN_OUT_DIR（ehdn_output）
+Input (environment variable or default):
+- EHDN_OUT_DIR (ehdn_output)
 - SAMPLE_LIST_DIR/ehdn_all_samples.tsv
-- DEPTHS_ALL_TSV（depth/depths_all.tsv）
-- GENE_REGIONS_BED（resources/gene_regions_1kb_pad.bed）
+- DEPTHS_ALL_TSV (depth/depths_all.tsv)
+- GENE_REGIONS_BED (resources/gene_regions_1kb_pad.bed)
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def ts() -> str:
 def read_depths(depth_tsv: Path) -> dict[str, float]:
     df = pd.read_csv(depth_tsv, sep="\t", dtype={"sample": str})
     if "sample" not in df.columns or "depth" not in df.columns:
-        # fallback: 1列目sample 2列目depth
+        # Fallback: column 1 = sample, column 2 = depth
         df = pd.read_csv(depth_tsv, sep="\t", header=0)
         df.columns = [c.lower() for c in df.columns]
     df["sample"] = df["sample"].astype(str)
@@ -79,12 +79,12 @@ def main() -> None:
     # Collect all loci coords for genic filter
     print(f"[{ts()}] [INFO] Collecting locus coordinates from EHdn outputs...")
     temp_bed = out_dir / "tmp_all_loci.bed"
-    # *.locus.tsv: headerあり。1行目スキップして contig start end を抽出
+    # *.locus.tsv: has header. Skip line 1 and extract contig start end
     cmd = f"find {ehdn_dir} -name '*.locus.tsv' -print0 | xargs -0 awk 'FNR>1{{print $1,$2,$3}}' OFS='\\t' > {temp_bed}"
     subprocess.run(cmd, shell=True, check=True)
 
     filtered_bed = out_dir / "genic_loci.bed"
-    # 重要: bedtools stdin は -a - を使う（v1の改善点）
+    # Important: use -a - for bedtools stdin (v1 improvement)
     cmd2 = f"sort -k1,1 -k2,2n {temp_bed} | uniq | bedtools intersect -a - -b {gene_bed} -u > {filtered_bed}"
     subprocess.run(cmd2, shell=True, check=True)
 
@@ -117,7 +117,7 @@ def main() -> None:
 
         try:
             df = pd.read_csv(f_path, sep="\t")
-            # EHdnの基本列（想定: contig,start,end,motif,num_anc_irrs）
+            # EHdn basic columns (expected: contig,start,end,motif,num_anc_irrs)
             if not {"contig", "start", "end", "motif", "num_anc_irrs"}.issubset(df.columns):
                 continue
 

@@ -7,18 +7,18 @@
 # ============================================================================
 # 14_outlier_burden_rare_casecontrol_crossfit_v19.py
 #
-# v19: observed_clusters_total 追加 + ヘッダコメント修正
-# - v18 High-PPV Edition をベースに以下を追加:
-#   (1) per_sample出力に observed_clusters_total 列を追加
-#       定義: motif filter + blacklist filter 後に、そのサンプルで≥1 IRRが検出された
-#       ユニークcluster数。recurrent-hit filter前のdf_scから計算。
-#       EHdnはreference-freeのため、サンプルごとに観測clusterが異なり、
-#       これがそのサンプルの"observation opportunity"を反映する。
-#   (2) rare_any 列を per_sample に直接追加
-#   (3) ヘッダコメントの MIN_IRR_RAW デフォルト値を 10.0 に修正（v18で stale だった）
-#   (4) observed_clusters_total の group 別要約をログ出力
-# - v18 からの変更なし: motif filter, blacklist, clustering, Z-score, recurrent-hit filter
-# - 実行時間を記録
+# v19: Added observed_clusters_total + fixed header comment
+# - Based on v18 High-PPV Edition with the following additions:
+#   (1) Added observed_clusters_total column to per_sample output
+#       Definition: after motif + blacklist filter, number of unique clusters with >=1 IRR detected in that sample
+#       Unique cluster count, computed from df_sc before recurrent-hit filter.
+#       Since EHdn is reference-free, observed clusters differ per sample,
+#       reflecting that sample's observation opportunity.
+#   (2) Added rare_any column directly to per_sample
+#   (3) Fixed MIN_IRR_RAW default in header comment to 10.0 (was stale in v18)
+#   (4) Log per-group summary of observed_clusters_total
+# - No changes from v18: motif filter, blacklist, clustering, Z-score, recurrent-hit filter
+# - Record execution time
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ import pandas as pd
 
 def is_artifact_motif(motif: str) -> bool:
     """
-    【強化版】ノイズになりやすいモチーフを徹底的に除外する
+    Enhanced version: thoroughly exclude noisy motifs
     """
     m = str(motif).upper()
     
@@ -58,7 +58,7 @@ def is_artifact_motif(motif: str) -> bool:
     return False
 
 def filter_with_blacklist(df: pd.DataFrame, blacklist_bed: Path) -> pd.DataFrame:
-    """bedtools intersect -v でブラックリスト領域を除外"""
+    """Exclude blacklist regions via bedtools intersect -v"""
     if df.empty: return df
     req_cols = ["contig", "start", "end"]
     if not set(req_cols).issubset(df.columns): return df
@@ -191,9 +191,9 @@ def main():
     print(f"[{ts()}] [INFO] Start v19 (High-PPV + observed_clusters_total)")
     root = Path(__file__).resolve().parents[2]
     
-    # Configs for High Precision (v18と同一パラメータ)
+    # Configs for High Precision (Same parameters as v18)
     cluster_bp = int(os.environ.get("CLUSTER_BP", "1000"))
-    min_irr_raw = float(os.environ.get("MIN_IRR_RAW", "10.0"))  # v19: コメント修正 (実値は v18 から 10.0)
+    min_irr_raw = float(os.environ.get("MIN_IRR_RAW", "10.0"))  # v19: Comment fix (actual value has been 10.0 since v18)
     max_hits = int(os.environ.get("MAX_OUTLIER_HITS", "10"))
     
     print(f"[{ts()}] [CONFIG] CLUSTER_BP = {cluster_bp}")
@@ -229,7 +229,7 @@ def main():
     keep = set(df_ped["SampleID"])
     s2g, s2f = dict(zip(df_ped["SampleID"], df_ped["Group"])), dict(zip(df_ped["SampleID"], df_ped["fold"]))
 
-    # Pass A: Filtering & Clustering (v18と同一)
+    # Pass A: Filtering & Clustering (same as v18)
     print(f"[{ts()}] [INFO] Pass A: Filtering & Clustering...")
     loci_set = set()
     h = pd.read_csv(merged_tsv, sep="\t", nrows=1)
@@ -253,7 +253,7 @@ def main():
     C = len(c_tbl)
     print(f"[{ts()}] [INFO] Unique Clusters (post motif+blacklist filter): {C:,}")
 
-    # Pass B: Aggregating (v18と同一)
+    # Pass B: Aggregating (same as v18)
     print(f"[{ts()}] [INFO] Pass B: Aggregating...")
     rows = []
     for chunk in pd.read_csv(merged_tsv, sep="\t", dtype=str, usecols=[c_sid,c_c,c_s,c_e,c_m,c_r,c_n], chunksize=chunksize):
@@ -276,14 +276,14 @@ def main():
         Group=lambda x: x["SampleID"].map(s2g), fold=lambda x: x["SampleID"].map(s2f)
     )
 
-    # ---- v19 NEW: observed_clusters_total を df_sc から計算 ----
-    # recurrent-hit filter 前の df_sc から計算する。
-    # recurrent-hit filter は outlier pruning であり、observation opportunity とは別。
+    # ---- v19 NEW: compute observed_clusters_total from df_sc ----
+    # Computed from df_sc before recurrent-hit filter.
+    # Recurrent-hit filter is outlier pruning, separate from observation opportunity.
     obs_clusters = df_sc.groupby("SampleID")["cluster_idx"].nunique().reset_index()
     obs_clusters.columns = ["SampleID", "observed_clusters_total"]
     print(f"[{ts()}] [INFO] observed_clusters_total: computed from df_sc (pre-recurrent-hit filter)")
 
-    # Z-scores & Outlier detection (v18と同一)
+    # Z-scores & Outlier detection (same as v18)
     print(f"[{ts()}] [INFO] Calculating Z-scores...")
     sum_all, sumsq_all = np.zeros(C), np.zeros(C)
     sum_fold, sumsq_fold = np.zeros((5, C)), np.zeros((5, C))
@@ -329,7 +329,7 @@ def main():
                     "norm_irr": sc_nrm[mask_te][i], "Z_score": z_te[i], "rare_freq": freq[sc_cid[mask_te][i]]
                 })
 
-    # Recurrent Filter (v18と同一: global post-hoc pruning)
+    # Recurrent Filter (same as v18: global post-hoc pruning)
     print(f"[{ts()}] [INFO] Recurrent Hit Filter (> {max_hits} samples)...")
     if details:
         cnt = Counter(d["cluster_idx"] for d in details)
@@ -346,11 +346,11 @@ def main():
     df_out = df_ped.assign(rare_outlier_count=counts)
     df_out["rare_any"] = (df_out["rare_outlier_count"] >= 1).astype(int)
     
-    # ---- v19 NEW: observed_clusters_total を per_sample に結合 ----
+    # ---- v19 NEW: merge observed_clusters_total into per_sample ----
     df_out = df_out.merge(obs_clusters, on="SampleID", how="left")
     df_out["observed_clusters_total"] = df_out["observed_clusters_total"].fillna(0).astype(int)
     
-    # ---- v19 NEW: group別 observed_clusters_total 要約 ----
+    # ---- v19 NEW: per-group observed_clusters_total summary ----
     print(f"\n[{ts()}] [INFO] === observed_clusters_total summary (per Group) ===")
     for grp in ["Healthy", "ASD", "SZ"]:
         sub = df_out.loc[df_out["Group"] == grp, "observed_clusters_total"]
@@ -361,7 +361,7 @@ def main():
               f"min={sub.min()}, max={sub.max()}, "
               f"N_zero={int((sub == 0).sum())}")
     
-    # exposure=0 のサンプルを警告（CRAMの処理失敗の可能性）
+    # Warn about samples with exposure=0 (possible CRAM processing failure)
     zero_exp = df_out.loc[df_out["observed_clusters_total"] == 0, "SampleID"].tolist()
     if zero_exp:
         print(f"\n[{ts()}] [WARN] {len(zero_exp)} samples have observed_clusters_total=0 "

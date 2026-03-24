@@ -18,17 +18,17 @@
 #SBATCH --error=logs/depth/depth_%A_%a.err
 
 # strling/01_calc_depth_array_fast_v2.sh (FIXED)
-# - sample_lists/ehdn_all_samples.tsv を対象に深度計算（family_member含む）
-# - Slurm実行環境でも config_v1.sh を確実に読むため、PROJECT_ROOT を絶対パスで指定
-# - 出力: depth/depth_parts/<SampleID>.tsv
-# - 実行時間を記録
+# - Compute depth on sample_lists/ehdn_all_samples.tsv (including family_member)
+# - Set PROJECT_ROOT as absolute path to ensure config_v1.sh is readable in Slurm environment
+# - Output: depth/depth_parts/<SampleID>.tsv
+# - Record execution time
 
 set -euo pipefail
 
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-# ★重要：Slurm上で確実に見つかるようプロジェクトルートを絶対パスで固定
+# IMPORTANT: Fix project root as absolute path for reliable access under Slurm
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "${PROJECT_ROOT}/config_v1.sh"
 
@@ -46,7 +46,7 @@ SAMPLE_ID=$(echo "${REC}" | cut -f1)
 CRAM_PATH=$(echo "${REC}" | cut -f3)
 OUT="${DEPTH_PARTS_DIR}/${SAMPLE_ID}.tsv"
 
-# 既にあるならスキップ
+# Skip if already exists
 if [ -s "${OUT}" ]; then
   exit 0
 fi

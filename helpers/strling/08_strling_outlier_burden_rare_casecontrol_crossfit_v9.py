@@ -6,28 +6,28 @@
 # (e.g. SAMPLE_INFO, PCA_EIGENVEC, CRAM_BASE_DIR1, CRAM_BASE_DIR2).
 # ============================================================================
 # 08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py
-# - v9変更点: Poisson GLMにexposure>0ガードを追加（exposure=0サンプルの除外＋ログ出力）
+# - v9 changes: added exposure>0 guard to Poisson GLM (exclude exposure=0 samples + log output)
 #
-# 処理内容:
-#   - STRling outliers の STRs.tsv（in-bounds loci）を入力に、rare outlier burden を case-control で推定
-#   - Healthy を K-fold に分割し、各サンプルは「自分のfoldを除いた train Healthy」で rare 定義（freq<rare_cut）される
-#   - event 定義: outlier(z) > zthr かつ p_adj <= p_adj_thr かつ sum_str_counts >= min_sum_str_counts
-#   - 近傍マージ (Clustering): 同一サンプル内で同一chr/motif/距離 < merge_dist の外れ値を1イベントにまとめる
-#   - 出力: per_sample.tsv / group_summary.long.tsv / thresholds.tsv / model_summary.txt / burden_stats_results.tsv
-#           / outlier_details.tsv (v8で追加)
+# Description:
+#   - Takes STRling outliers STRs.tsv (in-bounds loci) as input; estimates rare outlier burden in case-control design
+#   - Split Healthy into K-folds; each sample's rare definition (freq<rare_cut) uses train Healthy excluding own fold
+#   - Event definition: outlier(z) > zthr AND p_adj <= p_adj_thr AND sum_str_counts >= min_sum_str_counts
+#   - Proximity merge (Clustering): combine outliers within same sample/chr/motif and distance < merge_dist into 1 event
+#   - Output: per_sample.tsv / group_summary.long.tsv / thresholds.tsv / model_summary.txt / burden_stats_results.tsv
+#           / outlier_details.tsv (added in v8)
 #
-# v8 変更点 (v7 → v8):
-#   - merge_close_hits を改修: マージ後の代表hitの詳細情報（chrom, left, right, repeatunit, z,
-#     p_adj, sum_str_counts, locus, rare_freq）を返す
-#   - Pass 2 で各outlierの追加属性（p_adj, sum_str_counts, locus）も保持
-#   - outlier_details.tsv を出力: 全サンプルの全rare outlier loci（マージ後）を1行1 locusで記録
-#   - EHdn outlier_details.tsv と比較可能な形式
-#   - burden計算・統計テストなど他の処理はv7と完全に同一
+# v8 changes (v7 -> v8):
+#   - Reworked merge_close_hits: return detailed info for representative hit (chrom, left, right, repeatunit, z,
+#     p_adj, sum_str_counts, locus, rare_freq)
+#   - Pass 2 also retains additional attributes (p_adj, sum_str_counts, locus) for each outlier
+#   - Outputs outlier_details.tsv: records all rare outlier loci (post-merge) for all samples, one row per locus
+#   - Format comparable to EHdn outlier_details.tsv
+#   - All other processing (burden, stats) is identical to v7
 #
-# v7 変更点 (v6 → v7):
-#   - min_sum_str_counts のデフォルトを 0.0 → 1.0 に変更
+# v7 changes (v6 -> v7):
+#   - Changed min_sum_str_counts default from 0.0 to 1.0
 #
-# 使い方:
+# Usage:
 #   python 08_strling_outlier_burden_rare_casecontrol_crossfit_v9.py --merge_dist 1000
 
 from __future__ import annotations
@@ -225,11 +225,11 @@ def load_inbounds_loci(bounds_file: Path) -> Tuple[List[str], Dict[str, int]]:
 
 def merge_close_hits_with_details(hits_df: pd.DataFrame, dist_limit: int) -> Tuple[int, List[dict]]:
     """
-    同一サンプル内で、chromが同じ、motifが同じ、かつ距離が dist_limit 以内のヒットをまとめる。
-    グループ内で最大のZスコアを持つ行を代表とする。
-    返り値: (マージ後のヒット数, 代表hitの詳細リスト)
+    Merge hits within same sample where chrom, motif match and distance <= dist_limit.
+    Use the row with the highest Z-score as the representative.
+    Returns: (post-merge hit count, list of representative hit details)
 
-    v8追加: 代表hitの詳細情報も返す
+    v8: also returns detailed info for representative hits
     """
     if hits_df.empty:
         return 0, []
@@ -274,7 +274,7 @@ def merge_close_hits_with_details(hits_df: pd.DataFrame, dist_limit: int) -> Tup
 
 
 # ============================================================
-# Per-comparison 統計テスト関数
+# Per-comparison statistical test function
 # ============================================================
 
 def run_per_comparison_tests(df_m: pd.DataFrame, case_grps: List[str],
@@ -330,7 +330,7 @@ def run_per_comparison_tests(df_m: pd.DataFrame, case_grps: List[str],
 
         formula_pois = f"rare_outlier_count ~ IsCase + {cov_formula}"
         try:
-            # exposure>0 ガード: log(0) 未定義を回避
+            # Exposure>0 guard: avoid log(0) undefined
             mask_exp = df_sub[exposure_col].astype(float) > 0
             n_excluded = (~mask_exp).sum()
             if n_excluded > 0:
@@ -516,7 +516,7 @@ def main() -> None:
     print(f"[{ts()}] [INFO] Pass1 done")
 
     # --- Pass 2: Collecting Rare Outliers ---
-    # v8変更: p_adj, sum_str_counts, locusも保持
+    # v8: also retain p_adj, sum_str_counts, locus
     print(f"[{ts()}] [INFO] Pass2: Collecting rare outliers per sample...")
 
     sample_rare_hits: Dict[str, List[dict]] = {}
@@ -594,7 +594,7 @@ def main() -> None:
     print(f"[{ts()}] [INFO] Pass2 done. Start merging clusters (dist<{args.merge_dist}bp)...")
 
     # --- Merge Logic & Count ---
-    # v8変更: merge_close_hits_with_details を使い、代表hitの詳細を保持
+    # v8: use merge_close_hits_with_details to retain representative hit details
     final_rare_counts: Dict[str, int] = {}
     all_outlier_details: List[dict] = []
 
@@ -623,7 +623,7 @@ def main() -> None:
                 "rare_freq": rh["rare_freq"],
             })
 
-    # --- v8追加: outlier_details.tsv 出力 ---
+    # --- v8: write outlier_details.tsv ---
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 

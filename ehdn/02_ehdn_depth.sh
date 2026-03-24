@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 # 02_ehdn_depth.sh
-# ファイル名: 02_ehdn_depth.sh
-# 処理内容:
-#   - EHdn / STRling 共通の depth 計算パイプラインの入口ラッパー
-#   - Step 1: depth 計算（samtools depth、アレイジョブ）
-#   - Step 2: depth 集約（全サンプルの depth を1ファイルに統合）
-#   - 各ステップは sbatch dependency で連鎖
-#   - 投入した Job ID を manifest ファイルに記録
+# Filename: 02_ehdn_depth.sh
+# Description:
+#   - Entry-point wrapper for EHdn / STRling shared depth computation pipeline
+#   - Step 1: depth calculation (samtools depth, array job)
+#   - Step 2: depth aggregation (consolidate all sample depths into one file)
+#   - Steps are chained via sbatch dependency
+#   - Record submitted Job IDs in manifest file
 #
-# 前提:
-#   - 01_ehdn_setup_and_sample_lists.sh が完了していること
-#     （ehdn_all_samples.tsv が存在すること）
+# Prerequisites:
+#   - 01_ehdn_setup_and_sample_lists.sh must have completed
+#     (ehdn_all_samples.tsv must exist)
 #
-# 使い方:
+# Usage:
 #   bash 02_ehdn_depth.sh
 #
-# 注意:
-#   - 既存 helper script の処理内容は一切変更しない
-#   - ARRAY_SIZE placeholder を sed で置換した temp file を submit する
+# Notes:
+#   - Analytical logic in helper scripts is not modified
+#   - Submit temp file with ARRAY_SIZE placeholder replaced via sed
 
 set -euo pipefail
 

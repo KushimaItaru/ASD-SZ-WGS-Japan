@@ -6,11 +6,11 @@
 # environment variables defined in config_v1.sh.
 # ============================================================================
 # strling/01_strling_extract_array_genomewide_v3.sh
-# - (1) ehdn_all_samples.tsv（ASD/SZ/Healthy/family_member）を対象に STRling extract を実行
-# - (2) config を絶対パスで source（Slurm spool 配下でも失敗しない）
-# - (3) 出力: strling_output_genomewide/bins/<SampleID>.bin
-# - (4) ログ: strling_output_genomewide/logs（Slurm out/err + sample別 extract log）
-# - (5) 実行時間を記録
+# - (1) Run STRling extract on ehdn_all_samples.tsv (ASD/SZ/Healthy/family_member)
+# - (2) Source config using absolute path (works even under Slurm spool)
+# - (3) Output: strling_output_genomewide/bins/<SampleID>.bin
+# - (4) Log: strling_output_genomewide/logs (Slurm out/err + per-sample extract log)
+# - (5) Record execution time
 
 #SBATCH -J strling_extract_gw
 #SBATCH -p ncbn-cpu
@@ -38,15 +38,15 @@ if [ ! -f "${CFG}" ]; then
 fi
 source "${CFG}"
 
-# 強制的にこのプロジェクトの出力先にそろえる
+# Force output directory to match this project
 OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 BINS_DIR="${OUT_ROOT}/bins"
 LOG_DIR="${OUT_ROOT}/logs"
 
-# サンプルは EHdn と同じ（family_member含む）
+# Samples same as EHdn (including family_member)
 SAMPLES_TSV="${PROJECT_ROOT}/sample_lists/ehdn_all_samples.tsv"
 
-# configに無い場合のフォールバック
+# Fallback if not defined in config
 STRLING_BIN="${STRLING_BIN:-strling}"
 REFERENCE_FASTA="${REFERENCE_FASTA:-/lustre12/home/grifinpd-pg/resource_2020Aug/Homo_sapiens_assembly38.fasta}"  # CONFIGURE
 PROPORTION_REPEAT="${PROPORTION_REPEAT:-0.8}"
@@ -74,7 +74,7 @@ if [ -z "${REC}" ]; then
   exit 0
 fi
 
-# ehdn_all_samples.tsv は: SampleID  Group  CRAM_Path
+# ehdn_all_samples.tsv format: SampleID  Group  CRAM_Path
 SAMPLE_ID=$(echo "${REC}" | cut -f1)
 GROUP=$(echo "${REC}" | cut -f2)
 CRAM_PATH=$(echo "${REC}" | cut -f3)
@@ -87,7 +87,7 @@ if [ ! -f "${CRAM_PATH}" ]; then
   exit 4
 fi
 
-# CRAI確認
+# Verify CRAI
 if [ ! -f "${CRAM_PATH}.crai" ]; then
   echo "[$(TS)] [INFO] Creating CRAM index..."
   samtools index "${CRAM_PATH}"
@@ -96,7 +96,7 @@ fi
 OUT_BIN="${BINS_DIR}/${SAMPLE_ID}.bin"
 SAMPLE_LOG="${LOG_DIR}/${SAMPLE_ID}_extract.log"
 
-# 既にbinがあればスキップ（>1000Bを正常目安）
+# Skip if bin already exists (>1000B as sanity check)
 if [ -f "${OUT_BIN}" ]; then
   FILE_SIZE=$(stat -c%s "${OUT_BIN}" 2>/dev/null || wc -c < "${OUT_BIN}" 2>/dev/null || echo 0)
   if [ "${FILE_SIZE}" -gt 1000 ]; then

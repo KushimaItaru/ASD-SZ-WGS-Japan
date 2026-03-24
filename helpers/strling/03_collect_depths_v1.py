@@ -2,12 +2,12 @@
 """
 strling/03_collect_depths_v1.py
 
-処理内容:
-- depth/depth_parts/*.tsv を結合して depths_all.tsv を作成
-- 出力形式: sample \t depth（ヘッダ付き）
-- 実行時間を記録
+Description:
+- Merge depth/depth_parts/*.tsv into depths_all.tsv
+- Output format: sample \t depth (with header)
+- Record execution time
 
-使い方:
+Usage:
   Run via the top-level wrapper: ehdn/02_ehdn_depth.sh
 """
 
