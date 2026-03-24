@@ -25,8 +25,7 @@ ehdn/01_prepare_sample_lists_v2.py（v2）
 - EHdnプロファイル作成では family_member も含める（de novo用に必要）
 
 使い方:
-  cd <repo_root>
-  python3 ehdn/01_prepare_sample_lists_v2.py
+  Run via the top-level wrapper: ehdn/01_ehdn_setup_and_sample_lists.sh
 """
 
 from __future__ import annotations

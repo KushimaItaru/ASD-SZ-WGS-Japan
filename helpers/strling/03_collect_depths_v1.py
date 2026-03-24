@@ -8,8 +8,7 @@ strling/03_collect_depths_v1.py
 - 実行時間を記録
 
 使い方:
-  cd <repo_root>
-  python3 strling/03_collect_depths_v1.py
+  Run via the top-level wrapper: ehdn/02_ehdn_depth.sh
 """
 
 from __future__ import annotations

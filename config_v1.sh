@@ -23,7 +23,7 @@ export ANALYSIS_NOVEL_DIR="${PROJECT_ROOT}/analysis_results_novel"
 
 # ===== Input metadata =====
 # SAMPLE_INFO: サンプルメタデータファイルへのパス（環境変数で上書き可能）
-export SAMPLE_INFO="${SAMPLE_INFO:-${PROJECT_ROOT}/sampleInfo/GRIFIN_srWGS_SampleInfo.txt}"
+export SAMPLE_INFO="${SAMPLE_INFO:-/path/to/GRIFIN_srWGS_SampleInfo.txt}"
 
 # ===== CRAM base dirs (優先順に探索) =====
 export CRAM_BASE_DIR1="${CRAM_BASE_DIR1:-/path/to/cram/case}"

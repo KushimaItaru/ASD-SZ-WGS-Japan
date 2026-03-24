@@ -12,8 +12,10 @@ The repository is organized into two layers:
 | Entry-point wrappers (`strling/`, `ehdn/`, `crosscaller/`) | Clean wrapper scripts that define execution order, SLURM job dependencies, and logging. These are the recommended starting point for understanding and reproducing the workflow. |
 | Helper scripts (`helpers/`) | The underlying analytical scripts called by the wrappers. These perform the actual computation (genotyping, merging, burden testing, etc.). |
 
-Wrappers default to the repo-local `helpers/` directory, so a fresh clone is
-self-contained. The wrapper scripts perform **no analytical computation**. They
+Wrappers default to the repo-local `helpers/` directory, so the code
+structure is self-contained. However, execution requires external inputs
+(CRAM files, reference genome, sample metadata, PCA eigenvectors) that are
+not included in the repository. The wrapper scripts perform **no analytical computation**. They
 only determine array sizes from sample lists, submit helper scripts via
 `sbatch`, chain jobs with `--dependency=afterok`, and record Job IDs and
 timestamps in manifest files.
@@ -83,16 +85,19 @@ via environment variables.
   `OUT_ROOT` internally; these now default to the repo root but can be
   overridden with environment variables.
 
-Key paths that need adjustment for a new environment:
+The following variables are **environment-dependent and must be set** before
+running the pipeline:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PROJECT_ROOT` | Analysis root directory | Repository root (auto-detected) |
-| `REFERENCE_FASTA` | GRCh38 reference genome | Set in `config_v1.sh` |
-| `SAMPLE_INFO` | Sample metadata file | Set in `config_v1.sh` |
-| `PCA_EIGENVEC` | PCA eigenvector file | Set in helper scripts |
-| `CRAM_BASE_DIR1` | CRAM directory (GRIFIN) | Set in `config_v1.sh` |
-| `CRAM_BASE_DIR2` | CRAM directory (NCBN) | Set in `config_v1.sh` |
+| Variable | Description | How to set |
+|----------|-------------|------------|
+| `PROJECT_ROOT` | Analysis root directory | Auto-detected (repo root) |
+| `SAMPLE_INFO` | Sample metadata file | **Required** — set via environment variable or edit `config_v1.sh` |
+| `REFERENCE_FASTA` | GRCh38 reference genome | **Required** — set via environment variable or edit `config_v1.sh` |
+| `CRAM_BASE_DIR1` | CRAM directory (case) | **Required** — set via environment variable or edit `config_v1.sh` |
+| `CRAM_BASE_DIR2` | CRAM directory (control) | **Required** — set via environment variable or edit `config_v1.sh` |
+| `PCA_EIGENVEC` | PCA eigenvector file | **Required** — set via environment variable or edit helper scripts |
 
 Sample list files (`ehdn_all_samples.tsv`, `casecontrol_samples.tsv`) and
 depth files (`depths_all.tsv`) are excluded from this repository because they
@@ -191,13 +196,14 @@ and Mann–Whitney U tests.
 
 ---
 
-## Utilities excluded from the main analysis path
+## Scripts not included in this repository
 
-The following scripts were used in earlier exploratory analyses and are not
-part of the primary TRE burden workflow reported in the manuscript:
+The following legacy exploratory scripts are not included in this repository.
+They were used in earlier analyses and are not part of the primary TRE burden
+workflow reported in the manuscript:
 
-- `ehdn/15_annotate_genes_v18_gencode.py`
-- `ehdn/16_gene_significance_test_v18.py`
+- `15_annotate_genes_v18_gencode.py`
+- `16_gene_significance_test_v18.py`
 
 ## Result invariance
 

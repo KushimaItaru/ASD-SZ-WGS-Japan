@@ -13,9 +13,8 @@
 #   - 各ファイルの入力/出力行数、IN/OUT 内訳を summary TSV に記録
 #   - 実行時間（秒）を記録
 #
-# 使い方（デフォルトパスで実行）:
-#   cd <repo_root>
-#   python3 strling/10_make_calls_genic_inbounds_v1.py
+# 使い方:
+#   Run via the top-level wrapper: strling/02_strling_casecontrol_call_and_outliers.sh
 #
 # パスを明示する場合:
 #   python3 strling/10_make_calls_genic_inbounds_v1.py \
