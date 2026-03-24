@@ -25,7 +25,7 @@ ehdn/01_prepare_sample_lists_v2.py（v2）
 - EHdnプロファイル作成では family_member も含める（de novo用に必要）
 
 使い方:
-  cd ~/str_12282025
+  cd <repo_root>
   python3 ehdn/01_prepare_sample_lists_v2.py
 """
 
@@ -100,7 +100,7 @@ def main() -> None:
     start = datetime.now()
     print(f"[{ts()}] [INFO] Start 01_prepare_sample_lists_v2.py")
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
 
     sample_info = os.environ.get(
         "SAMPLE_INFO",

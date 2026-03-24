@@ -48,7 +48,7 @@ def main() -> None:
     start = datetime.now()
     print(f"[{ts()}] [INFO] Start 04_merge_ehdn_novel_norm_v2.py")
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     ehdn_dir = Path(os.environ.get("EHDN_OUT_DIR", str(project_root / "ehdn_output")))
     sample_list = Path(os.environ.get("SAMPLE_LIST_DIR", str(project_root / "sample_lists"))) / "ehdn_all_samples.tsv"
     depth_tsv = Path(os.environ.get("DEPTHS_ALL_TSV", str(project_root / "depth" / "depths_all.tsv")))

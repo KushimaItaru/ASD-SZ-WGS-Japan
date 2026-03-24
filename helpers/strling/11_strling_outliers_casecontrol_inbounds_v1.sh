@@ -13,13 +13,13 @@
 #   - 実行ログ・処理サンプル数・欠損数を記録し、実行時間を記録
 #
 # 使い方:
-#   sbatch /lustre12/home/kushima-pg/str_12282025/strling/11_strling_outliers_casecontrol_inbounds_v1.sh
+#   Run via the wrapper scripts in the top-level directories
 #
 # 出力:
-#   /lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/STRs.tsv
-#   /lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/control-file.tsv
-#   /lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/outliers_run.log
-#   /lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/outliers_casecontrol_inbounds_v1/summary.txt
+#   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/STRs.tsv
+#   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/control-file.tsv
+#   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/outliers_run.log
+#   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/summary.txt
 #
 # 注意:
 # - genotype は in-bounds のみに揃え済み（calls_genic_inbounds）を使います（OUT_OF_BOUNDSを主解析から除外）
@@ -33,15 +33,15 @@
 #SBATCH --cpus-per-task=1
 #SBATCH -t 24:00:00
 #SBATCH --mem=256G
-#SBATCH --output=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/outliers_inbounds_%A.out
-#SBATCH --error=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/outliers_inbounds_%A.err
+#SBATCH --output=logs/outliers_inbounds_%A.out
+#SBATCH --error=logs/outliers_inbounds_%A.err
 
 set -euo pipefail
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
-OUT_ROOT="/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide"  # CONFIGURE
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 
 LOG_DIR="${OUT_ROOT}/logs"
 WORK_DIR="${OUT_ROOT}/outliers_casecontrol_inbounds_v1"

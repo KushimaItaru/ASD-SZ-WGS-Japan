@@ -25,8 +25,8 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/../str_12282025/ehdn}"
-SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/../str_12282025/sample_lists/ehdn_all_samples.tsv}"
+HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/helpers/ehdn}"
+SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/sample_lists/ehdn_all_samples.tsv}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -41,11 +41,17 @@ N_SAMPLES=$(tail -n +2 "${SAMPLE_LIST}" | wc -l | tr -d ' ')
 echo "[$(TS)] [Step1] EHdn profile: N_SAMPLES=${N_SAMPLES}" | tee -a "${MANIFEST}"
 
 # 02_run_ehdn has ARRAY_SIZE placeholder → create temp with actual size
+TMP_EHDN=""
+trap '[[ -n "${TMP_EHDN:-}" ]] && rm -f "${TMP_EHDN}"' EXIT
 TMP_EHDN=$(mktemp "${LOG_DIR}/tmp_ehdn_XXXXXX.sh")
-trap 'rm -f "${TMP_EHDN}"' EXIT
 sed "s/ARRAY_SIZE/${N_SAMPLES}/g" "${HELPER_DIR}/02_run_ehdn_array_v2.sh" > "${TMP_EHDN}"
 
-JOB1=$(sbatch --parsable "${TMP_EHDN}")
+JOB1=$(sbatch --parsable \
+  --partition="${SLURM_PARTITION:-ncbn-cpu}" \
+  --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
+  --output="${LOG_DIR}/ehdn_%A_%a.out" \
+  --error="${LOG_DIR}/ehdn_%A_%a.err" \
+  "${TMP_EHDN}")
 echo "[$(TS)] [Step1] EHdn profile submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: merge (single job, after profile) ----
@@ -55,7 +61,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=ehdn_merge \
     --output="${LOG_DIR}/merge_%j.out" \
     --error="${LOG_DIR}/merge_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 04_merge_ehdn_novel_norm_v2.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/04_merge_ehdn_novel_norm_v2.py'")
 echo "[$(TS)] [Step2] merge submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

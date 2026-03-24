@@ -189,7 +189,7 @@ def build_clusters(locus_df, cluster_bp):
 def main():
     t0 = time.time()
     print(f"[{ts()}] [INFO] Start v19 (High-PPV + observed_clusters_total)")
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     
     # Configs for High Precision (v18と同一パラメータ)
     cluster_bp = int(os.environ.get("CLUSTER_BP", "1000"))

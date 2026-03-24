@@ -29,7 +29,7 @@ START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
 # ★重要：Slurm上で確実に見つかるようプロジェクトルートを絶対パスで固定
-PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "${PROJECT_ROOT}/config_v1.sh"
 
 mkdir -p "${LOG_DIR}/depth" "${DEPTH_PARTS_DIR}"

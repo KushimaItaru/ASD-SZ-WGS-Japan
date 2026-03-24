@@ -14,7 +14,7 @@
 #   - 実行時間（秒）を記録
 #
 # 使い方（デフォルトパスで実行）:
-#   cd /lustre12/home/kushima-pg/str_12282025
+#   cd <repo_root>
 #   python3 strling/10_make_calls_genic_inbounds_v1.py
 #
 # パスを明示する場合:
@@ -217,7 +217,7 @@ def filter_one_genotype(
 def main() -> None:
     ap = argparse.ArgumentParser()
     # デフォルトはあなたのプロジェクト構造に合わせる
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     out_root = project_root / "strling_output_genomewide"
 
     ap.add_argument(

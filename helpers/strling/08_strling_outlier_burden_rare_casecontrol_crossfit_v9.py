@@ -361,7 +361,7 @@ def run_per_comparison_tests(df_m: pd.DataFrame, case_grps: List[str],
 
 
 def main() -> None:
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     out_root = project_root / "strling_output_genomewide"
 
     ap = argparse.ArgumentParser(add_help=True)

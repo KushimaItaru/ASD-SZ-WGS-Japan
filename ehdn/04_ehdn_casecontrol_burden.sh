@@ -29,7 +29,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/../str_12282025/ehdn}"
+HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/helpers/ehdn}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -46,7 +46,7 @@ JOB1=$(sbatch --parsable \
     --job-name=ehdn_burden_v19 \
     --output="${LOG_DIR}/burden_v19_%j.out" \
     --error="${LOG_DIR}/burden_v19_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 14_outlier_burden_rare_casecontrol_crossfit_v19.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/14_outlier_burden_rare_casecontrol_crossfit_v19.py'")
 echo "[$(TS)] [Step1] burden v19 submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: burden statistical test (single job, after burden) ----
@@ -56,7 +56,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=ehdn_burden_stats_v20 \
     --output="${LOG_DIR}/burden_stats_v20_%j.out" \
     --error="${LOG_DIR}/burden_stats_v20_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${HELPER_DIR} && python3 17_burden_statistical_test_v20.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/17_burden_statistical_test_v20.py'")
 echo "[$(TS)] [Step2] burden stats v20 submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

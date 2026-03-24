@@ -8,7 +8,7 @@ strling/03_collect_depths_v1.py
 - 実行時間を記録
 
 使い方:
-  cd ~/str_12282025
+  cd <repo_root>
   python3 strling/03_collect_depths_v1.py
 """
 
@@ -28,7 +28,7 @@ def main() -> None:
     start = datetime.now()
     print(f"[{ts()}] [INFO] Start 03_collect_depths_v1.py")
 
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     parts_dir = Path(os.environ.get("DEPTH_PARTS_DIR", str(project_root / "depth" / "depth_parts")))
     out_tsv = Path(os.environ.get("DEPTHS_ALL_TSV", str(project_root / "depth" / "depths_all.tsv")))
 

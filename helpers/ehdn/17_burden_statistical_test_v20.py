@@ -36,7 +36,7 @@ def main():
     start_time = time.time()
     print("=== Burden Statistical Analysis v20 ===")
     print("=== Poisson GLM now includes offset=log(observed_clusters_total) ===")
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
 
     # v20: v19のper_sampleファイルを入力（observed_clusters_total列を含む）
     input_file = Path(os.environ.get("INPUT_TSV", str(

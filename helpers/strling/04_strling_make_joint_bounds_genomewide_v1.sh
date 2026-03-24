@@ -16,8 +16,8 @@ set -euo pipefail
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
-CFG="${PROJECT_ROOT}/strling/00_strling_genomewide_config_v1.sh"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+CFG="${PROJECT_ROOT}/helpers/strling/00_strling_genomewide_config_v1.sh"
 if [ ! -f "${CFG}" ]; then
   echo "[$(TS)] [ERROR] Config not found: ${CFG}" >&2
   exit 1
@@ -25,7 +25,7 @@ fi
 # shellcheck source=/dev/null
 source "${CFG}"
 
-OUT_ROOT="${OUT_ROOT:-/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide}"  # CONFIGURE
+OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 STR_RES_DIR="${STR_RES_DIR:-${OUT_ROOT}/str-results}"
 LOG_DIR="${LOG_DIR:-${OUT_ROOT}/logs}"
 mkdir -p "${STR_RES_DIR}" "${LOG_DIR}"

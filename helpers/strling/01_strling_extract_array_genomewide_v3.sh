@@ -21,16 +21,16 @@
 #SBATCH --cpus-per-task=1
 #SBATCH -t 12:00:00
 #SBATCH --mem=32G
-#SBATCH --output=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/extract_%A_%a.out
-#SBATCH --error=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/extract_%A_%a.err
+#SBATCH --output=logs/extract_%A_%a.out
+#SBATCH --error=logs/extract_%A_%a.err
 
 set -euo pipefail
 
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
-CFG="${PROJECT_ROOT}/strling/00_strling_genomewide_config_v1.sh"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+CFG="${PROJECT_ROOT}/helpers/strling/00_strling_genomewide_config_v1.sh"
 
 if [ ! -f "${CFG}" ]; then
   echo "[$(TS)] [ERROR] Config not found: ${CFG}" >&2
@@ -39,7 +39,7 @@ fi
 source "${CFG}"
 
 # 強制的にこのプロジェクトの出力先にそろえる
-OUT_ROOT="/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide"  # CONFIGURE
+OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 BINS_DIR="${OUT_ROOT}/bins"
 LOG_DIR="${OUT_ROOT}/logs"
 

@@ -21,8 +21,8 @@
 #SBATCH --cpus-per-task=1
 #SBATCH -t 24:00:00
 #SBATCH --mem=128G
-#SBATCH --output=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/merge_chr%A_%a.out
-#SBATCH --error=/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide/logs/merge_chr%A_%a.err
+#SBATCH --output=logs/merge_chr%A_%a.out
+#SBATCH --error=logs/merge_chr%A_%a.err
 
 set -euo pipefail
 shopt -s nullglob
@@ -31,7 +31,7 @@ START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
 # ★重要: config を絶対パスで source（Slurm spool でも確実に見つかる）
-CONFIG="/lustre12/home/kushima-pg/str_12282025/strling/00_strling_genomewide_config_v1.sh"  # CONFIGURE
+CONFIG="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}/helpers/strling/00_strling_genomewide_config_v1.sh"
 if [ ! -f "${CONFIG}" ]; then
   echo "[$(TS)] [ERROR] Config not found: ${CONFIG}" >&2
   exit 1
@@ -40,7 +40,7 @@ fi
 source "${CONFIG}"
 
 # config 側で未定義でも動くように保険
-OUT_ROOT="${OUT_ROOT:-/lustre12/home/kushima-pg/str_12282025/strling_output_genomewide}"  # CONFIGURE
+OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 BINS_DIR="${BINS_DIR:-${OUT_ROOT}/bins}"
 STR_RES_DIR="${STR_RES_DIR:-${OUT_ROOT}/str-results}"
 LOG_DIR="${LOG_DIR:-${OUT_ROOT}/logs}"

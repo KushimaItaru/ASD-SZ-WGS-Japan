@@ -15,7 +15,7 @@
 #   - 実行時間を記録
 #
 # 使い方:
-#   cd /lustre12/home/kushima-pg/str_12282025/strling
+#   cd <repo_root>/helpers/strling
 #   bash 04b_make_joint_bounds_genic_len3_8_v2.sh
 #
 # 環境変数で上書き可能:
@@ -29,10 +29,10 @@ set -euo pipefail
 START=$(date +%s)
 TS(){ date '+%Y-%m-%d %H:%M:%S'; }
 
-PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
-OUT_ROOT="${PROJECT_ROOT}/strling_output_genomewide"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+OUT_ROOT="${OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
 STR_RES="${OUT_ROOT}/str-results"
-RES_DIR="${PROJECT_ROOT}/resources"
+RES_DIR="${RES_DIR:-${PROJECT_ROOT}/resources}"
 LOG_DIR="${OUT_ROOT}/logs"
 
 mkdir -p "${STR_RES}" "${LOG_DIR}"

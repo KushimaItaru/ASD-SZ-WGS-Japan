@@ -12,10 +12,11 @@ The repository is organized into two layers:
 | Entry-point wrappers (`strling/`, `ehdn/`, `crosscaller/`) | Clean wrapper scripts that define execution order, SLURM job dependencies, and logging. These are the recommended starting point for understanding and reproducing the workflow. |
 | Helper scripts (`helpers/`) | The underlying analytical scripts called by the wrappers. These perform the actual computation (genotyping, merging, burden testing, etc.). |
 
-The wrapper scripts perform **no analytical computation**. They only determine
-array sizes from sample lists, submit helper scripts via `sbatch`, chain jobs
-with `--dependency=afterok`, and record Job IDs and timestamps in manifest
-files.
+Wrappers default to the repo-local `helpers/` directory, so a fresh clone is
+self-contained. The wrapper scripts perform **no analytical computation**. They
+only determine array sizes from sample lists, submit helper scripts via
+`sbatch`, chain jobs with `--dependency=afterok`, and record Job IDs and
+timestamps in manifest files.
 
 ## Directory structure
 
@@ -63,31 +64,56 @@ files.
 
 ## Path configuration
 
-The helper scripts contain hardcoded paths from the original analysis
-environment (NIG supercomputer). These paths are marked with `# CONFIGURE`
-comments. To run the pipeline in a different environment, update the following:
+Wrappers resolve the repository root automatically via
+`$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)` and default to the
+repo-local `helpers/` directory. Helper shell scripts resolve the repository
+root with `$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)` and Python
+helpers use `Path(__file__).resolve().parents[2]`.
+
+Some helper scripts retain NIG supercomputer default paths from the original
+analysis environment. These paths are marked with `# CONFIGURE` comments.
+To run the pipeline in a different environment, update these or override them
+via environment variables.
 
 - **`config_v1.sh`**: Central configuration file. Paths can be overridden via
   environment variables using the `${VAR:-default}` pattern.
 - **`helpers/strling/00_strling_genomewide_config_v1.sh`**: STRling-specific
   configuration (panel paths, output directories, SLURM defaults).
 - **Individual helper scripts**: Some scripts define `PROJECT_ROOT` and
-  `OUT_ROOT` internally; update these or set them as environment variables.
+  `OUT_ROOT` internally; these now default to the repo root but can be
+  overridden with environment variables.
 
-Key paths that need adjustment:
+Key paths that need adjustment for a new environment:
 
-| Variable | Description | Original value |
-|----------|-------------|----------------|
-| `PROJECT_ROOT` | Analysis root directory | `/lustre12/home/kushima-pg/str_12282025` |
-| `REFERENCE_FASTA` | GRCh38 reference genome | `/lustre12/home/grifinpd-pg/resource_2020Aug/Homo_sapiens_assembly38.fasta` |
-| `SAMPLE_INFO` | Sample metadata file | `/lustre12/home/kushima-pg/sampleInfo/GRIFIN_srWGS_SampleInfo_11242025.txt` |
-| `PCA_EIGENVEC` | PCA eigenvector file | `/lustre12/home/kushima-pg/PRS/.../pca.eigenvec` |
-| `CRAM_BASE_DIR1` | CRAM directory (GRIFIN) | `/lustre12/home/grifinpd-pg/analysis/parabricks` |
-| `CRAM_BASE_DIR2` | CRAM directory (NCBN) | `/lustre12/home/ncbn-share-pg/control_genome/pb3.1.0/results` |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PROJECT_ROOT` | Analysis root directory | Repository root (auto-detected) |
+| `REFERENCE_FASTA` | GRCh38 reference genome | Set in `config_v1.sh` |
+| `SAMPLE_INFO` | Sample metadata file | Set in `config_v1.sh` |
+| `PCA_EIGENVEC` | PCA eigenvector file | Set in helper scripts |
+| `CRAM_BASE_DIR1` | CRAM directory (GRIFIN) | Set in `config_v1.sh` |
+| `CRAM_BASE_DIR2` | CRAM directory (NCBN) | Set in `config_v1.sh` |
 
 Sample list files (`ehdn_all_samples.tsv`, `casecontrol_samples.tsv`) and
 depth files (`depths_all.tsv`) are excluded from this repository because they
 contain sample-level identifiers.
+
+## Runtime-generated directories
+
+The following directories are created during execution and are not versioned in
+the repository:
+
+- `sample_lists/`
+- `depth/`
+- `resources/`
+- `logs/`
+- `work/`
+- `ehdn_output/`
+- `merged_results_novel/`
+- `analysis_results_novel/`
+- `analysis_results_strling/`
+- `strling_output_genomewide/`
+- `crosscaller_results/`
 
 ---
 
@@ -185,6 +211,9 @@ EHdn pipelines.
 
 Each wrapper writes a timestamped manifest file under its own `logs/`
 directory, including submitted SLURM Job IDs and wrapper-level timing.
+Wrapper-level `sbatch --output/--error` options override any `#SBATCH` log
+paths that remain in the helper scripts, ensuring logs are written to the
+wrapper's `logs/` directory.
 
 ## Approximate runtime
 

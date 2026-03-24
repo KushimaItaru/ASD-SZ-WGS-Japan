@@ -21,7 +21,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-CROSSCALLER_DIR="${HELPER_DIR_CROSSCALLER:-${WRAPPER_ROOT}/../str_12282025/ehdn-strling_01022026}"
+CROSSCALLER_DIR="${HELPER_DIR_CROSSCALLER:-${WRAPPER_ROOT}/helpers/crosscaller}"
 
 LOG_DIR="${WRAPPER_ROOT}/crosscaller/logs"
 mkdir -p "${LOG_DIR}"
@@ -38,7 +38,7 @@ JOB1=$(sbatch --parsable \
     --job-name=tre_case_case_v3 \
     --output="${LOG_DIR}/case_case_v3_%j.out" \
     --error="${LOG_DIR}/case_case_v3_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && cd ${CROSSCALLER_DIR} && python3 20_tre_case_case_comparison_v3.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${CROSSCALLER_DIR}/20_tre_case_case_comparison_v3.py'")
 echo "[$(TS)] [Step1] case-case v3 submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

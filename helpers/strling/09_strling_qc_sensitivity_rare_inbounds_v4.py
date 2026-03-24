@@ -19,7 +19,7 @@
 #   - 実行時間を記録
 #
 # 使い方（引数なし）:
-#   cd /lustre12/home/kushima-pg/str_12282025/strling
+#   cd <repo_root>/helpers/strling
 #   python 09_strling_qc_sensitivity_rare_inbounds_v4.py
 
 from __future__ import annotations
@@ -119,7 +119,7 @@ def fit_poisson_offset(df: pd.DataFrame, y_col: str, exposure_col: str, cov_cols
 
 
 def main() -> None:
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = Path(__file__).resolve().parents[2]
     outdir = project_root / "analysis_results_strling"
     outdir.mkdir(parents=True, exist_ok=True)
 

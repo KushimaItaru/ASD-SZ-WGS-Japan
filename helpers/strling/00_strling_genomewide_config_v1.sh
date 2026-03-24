@@ -13,7 +13,7 @@
 set -euo pipefail
 
 # ---- Project root（固定）----
-export PROJECT_ROOT="/lustre12/home/kushima-pg/str_12282025"  # CONFIGURE
+export PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "${PROJECT_ROOT}/config_v1.sh"
 
 # ---- STRling env / binary ----
@@ -29,10 +29,10 @@ export STRLING_SAMPLES_TSV="${SAMPLE_LIST_DIR}/ehdn_all_samples.tsv"
 # export STRLING_SAMPLES_TSV="${SAMPLE_LIST_DIR}/casecontrol_samples.tsv"
 
 # ---- Output dirs (within this project) ----
-export STRLING_OUT_ROOT="${PROJECT_ROOT}/strling_output_genomewide"
-export STRLING_BINS_DIR="${STRLING_OUT_ROOT}/bins"
-export STRLING_RES_DIR="${STRLING_OUT_ROOT}/str-results"
-export STRLING_LOG_DIR="${STRLING_OUT_ROOT}/logs"
+export STRLING_OUT_ROOT="${STRLING_OUT_ROOT:-${PROJECT_ROOT}/strling_output_genomewide}"
+export STRLING_BINS_DIR="${STRLING_BINS_DIR:-${STRLING_OUT_ROOT}/bins}"
+export STRLING_RES_DIR="${STRLING_RES_DIR:-${STRLING_OUT_ROOT}/str-results}"
+export STRLING_LOG_DIR="${STRLING_LOG_DIR:-${STRLING_OUT_ROOT}/logs}"
 
 mkdir -p "${STRLING_BINS_DIR}" "${STRLING_RES_DIR}" "${STRLING_LOG_DIR}"
 

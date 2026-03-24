@@ -24,7 +24,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/../str_12282025/strling}"
+HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/helpers/strling}"
 CONFIG="${HELPER_DIR}/00_strling_genomewide_config_v1.sh"
 
 # source config to get STRLING_SAMPLES_TSV, STRLING_OUT_ROOT, etc.
@@ -43,15 +43,24 @@ N_SAMPLES=$(tail -n +2 "${STRLING_SAMPLES_TSV}" | wc -l)
 echo "[$(TS)] [Step1] extract: N_SAMPLES=${N_SAMPLES}" | tee -a "${MANIFEST}"
 
 # 01_extract has ARRAY_SIZE placeholder → create temp with actual size
-trap 'rm -f "${TMP_EXTRACT}"' EXIT
+TMP_EXTRACT=""
+trap '[[ -n "${TMP_EXTRACT:-}" ]] && rm -f "${TMP_EXTRACT}"' EXIT
 TMP_EXTRACT=$(mktemp "${LOG_DIR}/tmp_extract_XXXXXX.sh")
 sed "s/ARRAY_SIZE/${N_SAMPLES}/g" "${HELPER_DIR}/01_strling_extract_array_genomewide_v3.sh" > "${TMP_EXTRACT}"
 
-JOB1=$(sbatch --parsable "${TMP_EXTRACT}")
+JOB1=$(sbatch --parsable \
+  --partition="${SLURM_PARTITION:-ncbn-cpu}" \
+  --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
+  --output="${LOG_DIR}/extract_%A_%a.out" \
+  --error="${LOG_DIR}/extract_%A_%a.err" \
+  "${TMP_EXTRACT}")
 echo "[$(TS)] [Step1] extract submitted: JobID=${JOB1}" | tee -a "${MANIFEST}"
 
 # ---- Step 2: merge (array 1-24, after extract) ----
 JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
+    --partition="${SLURM_PARTITION:-ncbn-cpu}" --account="${SLURM_ACCOUNT:-ncbn-cpu}" \
+    --output="${LOG_DIR}/merge_%A_%a.out" \
+    --error="${LOG_DIR}/merge_%A_%a.err" \
     "${HELPER_DIR}/03_strling_merge_by_chrom_genomewide_v3.sh")
 echo "[$(TS)] [Step2] merge submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 

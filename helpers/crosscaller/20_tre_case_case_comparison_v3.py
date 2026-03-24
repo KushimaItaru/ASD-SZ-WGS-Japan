@@ -301,15 +301,15 @@ def main():
     print(f"[{ts()}] === TRE Case-Case Comparison (ASD vs SZ) v3 ===")
     print(f"[{ts()}] v2→v3: EHdn Poisson GLM uses offset=log(observed_clusters_total)")
 
-    str_root = Path("/home/kushima-pg/str_12282025")  # CONFIGURE
+    repo_root = Path(__file__).resolve().parents[2]
 
     ap = argparse.ArgumentParser()
     # v2: EHdn uses v19 per_sample (with observed_clusters_total)
     ap.add_argument("--ehdn_per_sample",
-                    default=str(str_root / "analysis_results_novel" / "outlier_burden_rare_crossfit_v19.per_sample.tsv"))
+                    default=str(repo_root / "analysis_results_novel" / "outlier_burden_rare_crossfit_v19.per_sample.tsv"))
     ap.add_argument("--strling_per_sample",
-                    default=str(str_root / "analysis_results_strling" / "strling_outlier_burden_rare_crossfit_inbounds_v9.per_sample.tsv"))
-    ap.add_argument("--outdir", default=str(str_root / "ehdn-strling_01022026"))
+                    default=str(repo_root / "analysis_results_strling" / "strling_outlier_burden_rare_crossfit_inbounds_v9.per_sample.tsv"))
+    ap.add_argument("--outdir", default=str(repo_root / "crosscaller_results"))
     ap.add_argument("--prefix", default="case_case_comparison_v3")
     args = ap.parse_args()
 
