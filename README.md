@@ -12,10 +12,11 @@ The repository is organized into two layers:
 | Entry-point wrappers (`strling/`, `ehdn/`, `crosscaller/`) | Clean wrapper scripts that define execution order, SLURM job dependencies, and logging. These are the recommended starting point for understanding and reproducing the workflow. |
 | Helper scripts (`helpers/`) | The underlying analytical scripts called by the wrappers. These perform the actual computation (genotyping, merging, burden testing, etc.). |
 
-Wrappers default to the repo-local `helpers/` directory, so the code
-structure is self-contained. However, execution requires external inputs
-(CRAM files, reference genome, sample metadata, PCA eigenvectors) that are
-not included in the repository. The wrapper scripts perform **no analytical computation**. They
+Wrappers default to the repo-local `helpers/` directory, so the workflow
+code is self-contained within the repository. However, execution still
+requires environment-specific external inputs and reference resources (for
+example CRAM files, sample metadata, PCA files, and reference genome
+files), which are not distributed in this repository. The wrapper scripts perform **no analytical computation**. They
 only determine array sizes from sample lists, submit helper scripts via
 `sbatch`, chain jobs with `--dependency=afterok`, and record Job IDs and
 timestamps in manifest files.
@@ -119,6 +120,14 @@ the repository:
 - `analysis_results_strling/`
 - `strling_output_genomewide/`
 - `crosscaller_results/`
+
+---
+
+## Prerequisites
+
+Before running either pipeline, generate sample lists via
+`ehdn/01_ehdn_setup_and_sample_lists.sh` or provide equivalent files
+manually.
 
 ---
 
