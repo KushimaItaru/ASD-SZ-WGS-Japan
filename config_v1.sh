@@ -1,11 +1,14 @@
 #!/bin/bash
 # config_v1.sh
 # - プロジェクト全体のパス・共通パラメータを集中管理
+#
+# 環境変数で上書き可能なパスにはデフォルト値を設定しています。
+# 実行環境に合わせて export してから source してください。
 
 set -euo pipefail
 
 # ===== Project root =====
-# このファイルは ~/str_12282025/config_v1.sh を想定
+# このファイルは <PROJECT_ROOT>/config_v1.sh を想定
 export PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ===== Common directories (created by setup) =====
@@ -19,17 +22,18 @@ export MERGED_NOVEL_DIR="${PROJECT_ROOT}/merged_results_novel"
 export ANALYSIS_NOVEL_DIR="${PROJECT_ROOT}/analysis_results_novel"
 
 # ===== Input metadata =====
-export SAMPLE_INFO="/lustre12/home/kushima-pg/sampleInfo/GRIFIN_srWGS_SampleInfo_11242025.txt"
+# SAMPLE_INFO: サンプルメタデータファイルへのパス（環境変数で上書き可能）
+export SAMPLE_INFO="${SAMPLE_INFO:-${PROJECT_ROOT}/sampleInfo/GRIFIN_srWGS_SampleInfo.txt}"
 
 # ===== CRAM base dirs (優先順に探索) =====
-export CRAM_BASE_DIR1="/lustre12/home/grifinpd-pg/analysis/parabricks"
-export CRAM_BASE_DIR2="/lustre12/home/ncbn-share-pg/control_genome/pb3.1.0/results"
+export CRAM_BASE_DIR1="${CRAM_BASE_DIR1:-/path/to/cram/case}"
+export CRAM_BASE_DIR2="${CRAM_BASE_DIR2:-/path/to/cram/control}"
 
 # ===== Reference =====
-export REFERENCE_FASTA="/lustre12/home/grifinpd-pg/resource_2020Aug/Homo_sapiens_assembly38.fasta"
+export REFERENCE_FASTA="${REFERENCE_FASTA:-/path/to/Homo_sapiens_assembly38.fasta}"
 
 # ===== EHdn =====
-export EHDN_BIN="/home/kushima-pg/ehdn_analysis/ExpansionHunterDenovo-v0.9.0-linux_x86_64/bin/ExpansionHunterDenovo"
+export EHDN_BIN="${EHDN_BIN:-ExpansionHunterDenovo}"
 export EHDN_MIN_ANCHOR_MAPQ="50"
 export EHDN_MAX_IRR_MAPQ="40"
 export EHDN_MIN_UNIT_LEN="3"
@@ -51,9 +55,9 @@ export GENE_REGIONS_BED="${RES_DIR}/gene_regions_1kb_pad.bed"
 # ===== Normalization =====
 export TARGET_DEPTH="40.0"
 
-# ===== Slurm (NCBN) =====
-export SLURM_PARTITION="ncbn-cpu"
-export SLURM_ACCOUNT="ncbn-cpu"
+# ===== Slurm =====
+export SLURM_PARTITION="${SLURM_PARTITION:-ncbn-cpu}"
+export SLURM_ACCOUNT="${SLURM_ACCOUNT:-ncbn-cpu}"
 
 # EHdn job resources
 export EHDN_CPUS="8"
