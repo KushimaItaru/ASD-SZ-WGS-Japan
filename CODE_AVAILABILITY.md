@@ -4,25 +4,22 @@
 
 Code for the tandem repeat expansion analyses is available at the GitHub
 repository ASD-SZ-WGS-Japan:
-https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (commit `e0664d2`).
+https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (release tag: v1.0.0).
 The repository contains the main entry-point wrapper scripts for the STRling
-and ExpansionHunter Denovo (EHdn) pipelines, the underlying helper scripts,
-configuration files, and documentation required to reproduce the primary
-tandem repeat burden analyses. Wrapper scripts organize execution order and
-job dependencies but do not alter the analytical logic.
+and ExpansionHunter Denovo (EHdn) pipelines, together with helper scripts,
+configuration files, and documentation for running the computational
+workflow. Reproducing the full analyses additionally requires access to the
+cohort-specific input data and reference resources used in this study.
 
 ## Shorter version (if space is limited)
 
 Code for the tandem repeat expansion analyses is available at
-https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (commit `e0664d2`).
+https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (release tag: v1.0.0).
 The repository includes the main entry-point wrapper scripts for the STRling
 and EHdn pipelines, together with helper scripts, configuration files, and
-documentation for reproducing the primary burden analyses.
-
----
-
-*Note: Replace the commit hash above with the final release tag (e.g.,
-`v1.0.0`) before manuscript submission.*
+documentation for running the computational workflow. Reproducing the full
+analyses additionally requires access to the cohort-specific input data and
+reference resources used in this study.
 
 ---
 
