@@ -100,6 +100,7 @@ running the pipeline:
 | `CRAM_BASE_DIR1` | CRAM directory (case) | **Required** — set via environment variable or edit `config_v1.sh` |
 | `CRAM_BASE_DIR2` | CRAM directory (control) | **Required** — set via environment variable or edit `config_v1.sh` |
 | `PCA_EIGENVEC` | PCA eigenvector file | **Required** — set via environment variable or edit helper scripts |
+| `CONDA_ENV_NAME` | Conda environment name | Defaults to `tre-burden` (matches `environment.yml`) |
 
 Sample list files (`ehdn_all_samples.tsv`, `casecontrol_samples.tsv`) and
 depth files (`depths_all.tsv`) are excluded from this repository because they

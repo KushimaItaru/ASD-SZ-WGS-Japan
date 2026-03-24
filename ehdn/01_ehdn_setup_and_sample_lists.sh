@@ -22,6 +22,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 HELPER_ROOT="${HELPER_ROOT:-${WRAPPER_ROOT}/helpers}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-tre-burden}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
 mkdir -p "${LOG_DIR}"
@@ -48,7 +49,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=ehdn_sample_lists \
     --output="${LOG_DIR}/sample_lists_%j.out" \
     --error="${LOG_DIR}/sample_lists_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_ROOT}/ehdn/01_prepare_sample_lists_v2.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && python3 ${HELPER_ROOT}/ehdn/01_prepare_sample_lists_v2.py'")
 echo "[$(TS)] [Step2] sample lists submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

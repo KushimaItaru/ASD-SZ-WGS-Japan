@@ -2,11 +2,10 @@
 
 ## Recommended version (Nature Communications)
 
-Code for the tandem repeat expansion analyses is available at the GitHub
-repository ASD-SZ-WGS-Japan:
+Code for the tandem repeat expansion analyses is available at
 https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (release tag: v1.0.0).
-The repository contains the main entry-point wrapper scripts for the STRling
-and ExpansionHunter Denovo (EHdn) pipelines, together with helper scripts,
+The repository contains entry-point wrapper scripts for the STRling and
+ExpansionHunter Denovo (EHdn) pipelines, together with helper scripts,
 configuration files, and documentation for running the computational
 workflow. Reproducing the full analyses additionally requires access to the
 cohort-specific input data and reference resources used in this study.
@@ -15,8 +14,18 @@ cohort-specific input data and reference resources used in this study.
 
 Code for the tandem repeat expansion analyses is available at
 https://github.com/KushimaItaru/ASD-SZ-WGS-Japan (release tag: v1.0.0).
-The repository includes the main entry-point wrapper scripts for the STRling
-and EHdn pipelines, together with helper scripts, configuration files, and
+The repository includes entry-point wrapper scripts for the STRling and
+EHdn pipelines, together with helper scripts, configuration files, and
+documentation for running the computational workflow. Reproducing the full
+analyses additionally requires access to the cohort-specific input data and
+reference resources used in this study.
+
+## Version without release tag (if tag not yet created)
+
+Code for the tandem repeat expansion analyses is available at
+https://github.com/KushimaItaru/ASD-SZ-WGS-Japan. The repository contains
+entry-point wrapper scripts for the STRling and ExpansionHunter Denovo
+(EHdn) pipelines, together with helper scripts, configuration files, and
 documentation for running the computational workflow. Reproducing the full
 analyses additionally requires access to the cohort-specific input data and
 reference resources used in this study.

@@ -26,6 +26,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 HELPER_DIR="${HELPER_DIR_EHDN:-${WRAPPER_ROOT}/helpers/ehdn}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-tre-burden}"
 SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/sample_lists/ehdn_all_samples.tsv}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
@@ -61,7 +62,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=ehdn_merge \
     --output="${LOG_DIR}/merge_%j.out" \
     --error="${LOG_DIR}/merge_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/04_merge_ehdn_novel_norm_v2.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && python3 ${HELPER_DIR}/04_merge_ehdn_novel_norm_v2.py'")
 echo "[$(TS)] [Step2] merge submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----

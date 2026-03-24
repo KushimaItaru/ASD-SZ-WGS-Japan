@@ -23,6 +23,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/helpers/strling}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-tre-burden}"
 CONFIG="${HELPER_DIR}/00_strling_genomewide_config_v1.sh"
 
 source "${CONFIG}"
@@ -62,7 +63,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=strling_inbounds \
     --output="${LOG_DIR}/inbounds_%j.out" \
     --error="${LOG_DIR}/inbounds_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/10_make_calls_genic_inbounds_v1.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && python3 ${HELPER_DIR}/10_make_calls_genic_inbounds_v1.py'")
 echo "[$(TS)] [Step2] in-bounds filter submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Step 3: outlier detection (single job, after in-bounds) ----

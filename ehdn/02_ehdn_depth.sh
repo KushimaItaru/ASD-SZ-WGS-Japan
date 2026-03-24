@@ -27,6 +27,7 @@ TS(){ date "+%Y-%m-%d %H:%M:%S"; }
 # ---- Paths (configurable via environment variables) ----
 WRAPPER_ROOT="${WRAPPER_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 HELPER_DIR="${HELPER_DIR_STRLING:-${WRAPPER_ROOT}/helpers/strling}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-tre-burden}"
 SAMPLE_LIST="${SAMPLE_LIST_EHDN:-${WRAPPER_ROOT}/sample_lists/ehdn_all_samples.tsv}"
 
 LOG_DIR="${WRAPPER_ROOT}/ehdn/logs"
@@ -62,7 +63,7 @@ JOB2=$(sbatch --parsable --dependency=afterok:${JOB1} \
     --job-name=ehdn_collect_depths \
     --output="${LOG_DIR}/collect_depths_%j.out" \
     --error="${LOG_DIR}/collect_depths_%j.err" \
-    --wrap="bash -lc 'source ~/.bashrc && conda activate ngs && python3 ${HELPER_DIR}/03_collect_depths_v1.py'")
+    --wrap="bash -lc 'source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && python3 ${HELPER_DIR}/03_collect_depths_v1.py'")
 echo "[$(TS)] [Step2] collect_depths submitted: JobID=${JOB2} (afterok:${JOB1})" | tee -a "${MANIFEST}"
 
 # ---- Summary ----
