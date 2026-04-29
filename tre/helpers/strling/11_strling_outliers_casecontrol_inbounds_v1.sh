@@ -13,7 +13,7 @@
 #   - Record execution log, processed sample count, and missing count; Record execution time
 #
 # Usage:
-#   Run via the top-level wrapper: strling/02_strling_casecontrol_call_and_outliers.sh
+#   Run via the top-level wrapper: tre/strling/02_strling_casecontrol_call_and_outliers.sh
 #
 # Output:
 #   <repo_root>/strling_output_genomewide/outliers_casecontrol_inbounds_v1/links/STRs.tsv

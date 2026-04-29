@@ -15,7 +15,7 @@
 #   - Record execution time
 #
 # Usage:
-#   Run via the top-level wrapper: strling/01_strling_build_panel.sh
+#   Run via the top-level wrapper: tre/strling/01_strling_build_panel.sh
 #
 # Overridable via environment variables:
 #   JOINT=/path/to/joint-bounds.txt

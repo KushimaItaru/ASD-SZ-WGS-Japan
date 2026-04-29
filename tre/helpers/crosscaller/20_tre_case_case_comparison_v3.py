@@ -33,7 +33,7 @@
 #   - case_case_comparison_v3.heterogeneity.tsv: heterogeneity test results
 #
 # Usage:
-#   Run via the top-level wrapper: crosscaller/04_tre_crosscaller_compare.sh
+#   Run via the top-level wrapper: tre/crosscaller/04_tre_crosscaller_compare.sh
 
 from __future__ import annotations
 
