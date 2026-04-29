@@ -14,10 +14,10 @@
 #   - Record execution time (seconds)
 #
 # Usage:
-#   Run via the top-level wrapper: strling/02_strling_casecontrol_call_and_outliers.sh
+#   Run via the top-level wrapper: tre/strling/02_strling_casecontrol_call_and_outliers.sh
 #
 # To specify paths explicitly:
-#   python3 strling/10_make_calls_genic_inbounds_v1.py \
+#   python3 tre/strling/10_make_calls_genic_inbounds_v1.py \
 #     --bounds /path/to/joint-bounds.genic_1kbpad.len3_8.txt \
 #     --calls-dir /path/to/calls_genic \
 #     --out-dir /path/to/calls_genic_inbounds

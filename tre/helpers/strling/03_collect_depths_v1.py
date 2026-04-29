@@ -8,7 +8,7 @@ Description:
 - Record execution time
 
 Usage:
-  Run via the top-level wrapper: ehdn/02_ehdn_depth.sh
+  Run via the top-level wrapper: tre/ehdn/02_ehdn_depth.sh
 """
 
 from __future__ import annotations

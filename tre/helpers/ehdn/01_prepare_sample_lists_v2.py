@@ -25,7 +25,7 @@ Notes:
 - family_member samples are included in EHdn profiling (needed for de novo analysis)
 
 Usage:
-  Run via the top-level wrapper: ehdn/01_ehdn_setup_and_sample_lists.sh
+  Run via the top-level wrapper: tre/ehdn/01_ehdn_setup_and_sample_lists.sh
 """
 
 from __future__ import annotations

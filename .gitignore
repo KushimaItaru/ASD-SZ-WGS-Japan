@@ -1,26 +1,49 @@
-# Runtime-generated data / outputs
-sample_lists/
-depth/
-resources/
-logs/
-work/
-ehdn_output/
-merged_results_novel/
-analysis_results_novel/
-analysis_results_strling/
-strling_output_genomewide/
-crosscaller_results/
+# ============================================================================
+# Runtime-generated data / outputs (TRE pipeline; created under tre/)
+# ============================================================================
+tre/sample_lists/
+tre/depth/
+tre/resources/
+tre/logs/
+tre/work/
+tre/ehdn_output/
+tre/merged_results_novel/
+tre/analysis_results_novel/
+tre/analysis_results_strling/
+tre/strling_output_genomewide/
+tre/crosscaller_results/
 
 # Local convenience symlinks / non-versioned shared inputs
-common/sample_lists/
-common/depth/
-common/resources/
-common/logs/
+tre/common/sample_lists/
+tre/common/depth/
+tre/common/resources/
+tre/common/logs/
 
-# Wrapper logs
-strling/logs/
-ehdn/logs/
-crosscaller/logs/
+# Wrapper logs (TRE)
+tre/strling/logs/
+tre/ehdn/logs/
+tre/crosscaller/logs/
+
+# ============================================================================
+# Future: TAD / Joint-layer pipeline runtime data (placeholders)
+# ============================================================================
+tad/sample_lists/
+tad/output_*/
+tad/logs/
+tad/work/
+joint_layer/output_*/
+joint_layer/logs/
 
 # Temp files
 *.tmp
+__pycache__/
+*.pyc
+*.pyo
+.Rhistory
+.RData
+
+# Editor / OS artifacts
+.DS_Store
+.vscode/
+.idea/
+*.swp
