@@ -1,0 +1,20 @@
+{
+  "BIN_SIZE_BP": 25000,
+  "F_05_SAMPLE_BURDEN_L2": "/lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v4/sample_burden_L2_and_specificity_v4.tsv",
+  "F_05_SAMPLE_BURDEN_L2_SUM": "/lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v4/sample_burden_L2_and_specificity_summary_v4.tsv",
+  "F_06_B_PRIME_L2_RESULTS": "/lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v5/B_prime_L2_classes_results_v5.tsv",
+  "F_06_COVARIATES": "/lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v5/covariates_v5.tsv.gz",
+  "L2_CLASSES": [
+    "HPC_Exc-CA",
+    "HPC_Exc-DG",
+    "HPC_Exc-ENT",
+    "HPC_Inh-CGE",
+    "HPC_Inh-MGE",
+    "PFC_Astro",
+    "PFC_Exc-DL",
+    "PFC_Exc-UL",
+    "PFC_Inh-CGE",
+    "PFC_Inh-MGE"
+  ],
+  "OUT_06_B_PRIME_L2": "/lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v5"
+}
