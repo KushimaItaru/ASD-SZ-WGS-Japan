@@ -28,7 +28,7 @@ set -e
 START_TIME=$(date +%s)
 echo "=== Pipeline start (v9): $(date) ==="
 
-cd /lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/
+cd /lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/
 
 python -c "import pandas, numpy, scipy, statsmodels" || {
     echo "ERROR: pandas / numpy / scipy / statsmodels が必要"

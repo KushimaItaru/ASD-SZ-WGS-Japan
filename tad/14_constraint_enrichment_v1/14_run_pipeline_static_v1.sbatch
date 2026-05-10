@@ -2,8 +2,8 @@
 #SBATCH -p ncbn-cpu
 #SBATCH --account=ncbn-cpu
 #SBATCH -J static_v1_pipeline
-#SBATCH -o /lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/log/static_v1_%j.out
-#SBATCH -e /lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/log/static_v1_%j.err
+#SBATCH -o /lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/log/static_v1_%j.out
+#SBATCH -e /lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/log/static_v1_%j.err
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
@@ -23,7 +23,7 @@
 
 set -e
 
-cd /lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1
+cd /lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1
 
 mkdir -p log
 mkdir -p output_v1

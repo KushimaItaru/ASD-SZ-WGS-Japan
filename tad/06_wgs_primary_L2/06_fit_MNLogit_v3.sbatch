@@ -5,8 +5,8 @@
 #SBATCH -c 8
 #SBATCH --mem=32G
 #SBATCH -t 02:00:00
-#SBATCH -o /lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/MNLogit_v3.out
-#SBATCH -e /lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/MNLogit_v3.err
+#SBATCH -o /lustre12/home/kushima-pg/tad04212026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/MNLogit_v3.out
+#SBATCH -e /lustre12/home/kushima-pg/tad04212026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/MNLogit_v3.err
 
 # ファイル名: 06_fit_MNLogit_v3.sbatch
 # 処理内容:
@@ -30,9 +30,9 @@
 #       * [LOG] Cov(β_ASD, β_SZ) < 0 に WARN ログ
 #   - ASD vs SZ heterogeneity test (MNLogit, 10 class × 2 SV = 20 fit + 4 global)
 #   - 入力: Step 05 v3 (sample-level top-1% QC 適用済み, Pattern A=NAHR-excluded)
-#       /lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v3/
+#       /lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden/output_v3/
 #         sample_burden_L2_and_specificity_v3.tsv
-#   - 出力: tad04292026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/
+#   - 出力: tad04212026/06_wgs_primary_L2/output_v4/output_MNLogit_v3/
 #       MNLogit_heterogeneity_results_v3.tsv
 #       MNLogit_heterogeneity_summary_v3.tsv
 #       MNLogit_heterogeneity_qc_v3.json
@@ -43,7 +43,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="/lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2"
+SCRIPT_DIR="/lustre12/home/kushima-pg/tad04212026/06_wgs_primary_L2"
 OUT_DIR="${SCRIPT_DIR}/output_v4/output_MNLogit_v3"
 mkdir -p "${OUT_DIR}"
 

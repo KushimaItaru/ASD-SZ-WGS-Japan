@@ -12,7 +12,7 @@ Same as v1/v2 patches: **immediately before `del disrupted_bins_a, disrupted_bin
 ## Step 1: Copy v18 → v19
 
 ```bash
-cd /lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden/
+cd /lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/
 cp tad_replication_mssng_v18.py tad_replication_mssng_v19.py
 cp 09a_mssng_replication_v18.sbatch 09a_mssng_replication_v19.sbatch
 # Edit 09a_..._v19.sbatch to invoke v19.py
@@ -59,7 +59,7 @@ phase4_out = run_phase4_bin_counts(
     log("V19 ADDITION (patch v3): Dumping event-bin + sample covariate")
     log("=" * 70)
     import os as _os
-    _OUT_DIR = "/lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/output_v1"
+    _OUT_DIR = "/lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/output_v1"
     _os.makedirs(_OUT_DIR, exist_ok=True)
 
     # ---- v3 Sex mapping (robust to M/F, 1/0, 1/2, Male/Female, true/false) ----
@@ -179,14 +179,14 @@ awk -F',' 'NR==1{for(i=1;i<=NF;i++) if($i=="SEX"||$i=="Sex"||$i=="sex") c=i; nex
 ## Step 6: Re-submit v19
 
 ```bash
-cd /lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden/
+cd /lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/
 sbatch 09a_mssng_replication_v19.sbatch
 ```
 
 ## Step 7: Verify both dumps
 
 ```bash
-ls -lh /lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/output_v1/mssng_*
+ls -lh /lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/output_v1/mssng_*
 
 zcat .../mssng_event_bins_dumped_v1.tsv.gz | head -3
 zcat .../mssng_sample_covariates_dumped_v1.tsv.gz | head -3

@@ -28,7 +28,7 @@
 #       5. 出力 dir / file: output_v3 -> output_v4
 #       6. 解析ロジック (A1/A2/A3/A3-strict、GEE Binom Indep main + Firth sens、
 #          BH/Holm、3 段 pre-check / MIN_CELL_COUNT=5) は v3 と完全一致
-#   - 期待結果: tad04292026/output_v3 と数値 bit-identical
+#   - 期待結果: tad04212026/output_v3 と数値 bit-identical
 #   - 依存入力:
 #       tad04292026/02_bin_l2_annotation/output_v3/bin_l2_annotation_v3.tsv.gz
 #       /lustre12/home/kushima-pg/noncoding_tad_mssng_03132026/output_mssng_factorial_overlap_v1/

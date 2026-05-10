@@ -20,7 +20,7 @@
 #         - Exc-NP-TSHZ2 → Exc-DL
 #     (5) 出力 suffix を v8 に統一
 #   - v9 からの主な変更点:
-#     (1) tad04292026/ パイプラインに移行
+#     (1) tad04212026/ パイプラインに移行
 #     (2) パスを common/paths_v1.py で一元管理（Path.cwd() 依存を廃止）
 #     (3) 出力 suffix を v9 に統一、出力先を OUT_01_BOUNDARY_MASTER に固定
 #   - excitatory 用 flags（RG-anchor gain/loss）と inhibitory 用 flags（CGE/MGE × gain/loss）を付与する

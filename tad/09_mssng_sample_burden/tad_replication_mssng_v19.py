@@ -16,8 +16,8 @@
 #   - Phase 6 : GEE logistic回帰 (Independence, family-clustered)
 #   - Phase 7 : 結果出力 (両パターン, FDR補正なし)
 #
-# v17 から v18 への変更点 (2026-04-21 tad04292026 パイプライン移植):
-#   1. _BASEDIR を tad04292026/09_mssng_sample_burden に変更。
+# v17 から v18 への変更点 (2026-04-21 tad04212026 パイプライン移植):
+#   1. _BASEDIR を tad04212026/09_mssng_sample_burden に変更。
 #      MSSNG 原データ (cnv_merged.csv, subject_table.csv, Sample.tsv, 各種 BED) と
 #      Heffel boundary / L2 diffbound は noncoding_tad_mssng_03132026 / heffel_deep_analysis_03242026
 #      のまま read-only 参照する。
@@ -98,7 +98,7 @@ warnings.filterwarnings("ignore")
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
-_BASEDIR = "/lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden"
+_BASEDIR = "/lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden"
 # 補足: MSSNG 原データ (cnv_merged.csv 等) は /lustre12/home/kushima-pg/resource/mssng/ と
 # /lustre12/home/kushima-pg/noncoding_tad_mssng_03132026 を read-only で参照する
 # (下記 _CNV_MERGED_FILE 等の絶対パス指定はそのまま)。
@@ -1059,7 +1059,7 @@ def run_phase4_bin_counts(sv, sample_status_dict, bin_index, fid_map=None,
     log("V19 ADDITION (patch v3): Dumping event-bin + sample covariate")
     log("=" * 70)
     import os as _os
-    _OUT_DIR = "/lustre12/home/kushima-pg/tad04292026/14_constraint_enrichment_v1/output_v1"
+    _OUT_DIR = "/lustre12/home/kushima-pg/tad04212026/14_constraint_enrichment_v1/output_v1"
     _os.makedirs(_OUT_DIR, exist_ok=True)
 
     def _sex_to_numeric(x):
@@ -1516,7 +1516,7 @@ def run_phase7_output(all_results, n_case, n_ctrl, n_clusters, gd_nahr_count):
             "script": "tad_replication_mssng_v18.py",
             "version": "v18",
             "changes_from_v17": [
-                "tad04292026 pipeline: _BASEDIR relocated to 09_mssng_sample_burden",
+                "tad04212026 pipeline: _BASEDIR relocated to 09_mssng_sample_burden",
                 "_OUTDIR set to {_BASEDIR}/output_v18 (or output_v18_{MIN_SV_LEN}bp for sensitivity)",
                 "Output TSV renamed: tad_replication_mssng_v17.tsv -> tad_replication_mssng_v18.tsv",
                 "Preflight file renamed: preflight_exposed_counts_v17.tsv -> preflight_exposed_counts_v18.tsv",

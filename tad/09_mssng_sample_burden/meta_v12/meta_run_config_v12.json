@@ -1,0 +1,47 @@
+{
+  "script": "tad_replication_meta_analysis_v12.py",
+  "version": "v12",
+  "changes_from_v11": [
+    "arrayCGH input updated: v21 -> v22 (tad04212026/08_arraycgh_sample_burden/output_v22)",
+    "MSSNG input updated: v17 -> v18 (tad04212026/09_mssng_sample_burden/output_v18)",
+    "OUTDIR updated: tad04212026/09_mssng_sample_burden/meta_v12",
+    "Output TSV suffixes: _v11 -> _v12",
+    "Cohort labels: arrayCGH_v22, MSSNG_v18_fullfamily",
+    "Meta logic (IVW, Stouffer, analysis_set classification) UNCHANGED from v11"
+  ],
+  "changes_from_v7": [
+    "arrayCGH input updated: v18 -> v19 (overlap_srWGS column-based exclusion replacing SampleID matching)",
+    "arrayCGH v19 outputs split into ASD/SZ/het files; reading ASD result only",
+    "detect_column: platform_meta_p_two added as candidate for v18 column name",
+    "MSSNG v17 unchanged (already has segdup/exclusion BED filters)",
+    "All three datasets now share unified QC: segdup < 50% + exclusion BED < 50%"
+  ],
+  "array_tsv": "/lustre12/home/kushima-pg/tad04212026/08_arraycgh_sample_burden/output_v22/tad_replication_asd_vs_cont_v22.tsv",
+  "mssng_tsv": "/lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/output_v18/tad_replication_mssng_v18.tsv",
+  "outdir": "/lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/meta_v12",
+  "primary_main_method": "inverse_variance_fixed_effect",
+  "primary_sensitivity_method": "directional_one_sided_weighted_stouffer",
+  "secondary_main_method": "inverse_variance_fixed_effect",
+  "negative_control_method": "inverse_variance_fixed_effect_two_sided",
+  "weight_mode_stouffer": "sqrt_neff",
+  "discovery_sig_classes": [
+    "hpc_exc_dg",
+    "hpc_exc_ent",
+    "hpc_inh_cge",
+    "hpc_inh_mge",
+    "pfc_exc_dl",
+    "pfc_exc_ul",
+    "pfc_inh_cge",
+    "pfc_inh_mge"
+  ],
+  "discovery_nonsig_classes": [
+    "hpc_exc_ca",
+    "pfc_astro"
+  ],
+  "arraycgh_version": "v22",
+  "arraycgh_inference": "Platform-stratified Logit+LRT -> IVW fixed-effect meta (v22, tad04212026 pipeline)",
+  "mssng_version": "v18_full_family",
+  "mssng_inference": "GEE Independence (v18, tad04212026 pipeline)",
+  "qc_alignment": "All cohorts apply: segdup < 50%, exclusion BED < 50% (unified with WGS v18)",
+  "timestamp": "2026-04-21 18:49:43"
+}

@@ -27,8 +27,8 @@
 #
 # *** Phase 0-1, 3-7 の解析ロジックは v18 から変更なし ***
 #
-# v21 からの変更点 (v22, 2026-04-21 tad04292026 パイプライン移植):
-#   1. _BASEDIR を tad04292026/08_arraycgh_sample_burden に変更。
+# v21 からの変更点 (v22, 2026-04-21 tad04212026 パイプライン移植):
+#   1. _BASEDIR を tad04212026/08_arraycgh_sample_burden に変更。
 #      arrayCGH 入力 (xlsx, chain, commonCNV) の _SCRIPT_DIR は
 #      noncoding_tad_arraycgh_03302026 のままで参照（read-only）。
 #   2. _OUTDIR を {_BASEDIR}/output_v22 に変更。
@@ -68,7 +68,7 @@ warnings.filterwarnings("ignore")
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
-_BASEDIR = "/lustre12/home/kushima-pg/tad04292026/08_arraycgh_sample_burden"
+_BASEDIR = "/lustre12/home/kushima-pg/tad04212026/08_arraycgh_sample_burden"
 _HEFFEL_DIR = "/lustre12/home/kushima-pg/heffel_deep_analysis_03242026"
 _SCRIPT_DIR = "/lustre12/home/kushima-pg/noncoding_tad_arraycgh_03302026"
 

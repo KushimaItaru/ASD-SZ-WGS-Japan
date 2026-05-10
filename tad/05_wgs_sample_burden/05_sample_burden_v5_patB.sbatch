@@ -5,8 +5,8 @@
 #SBATCH -c 8
 #SBATCH --mem=64G
 #SBATCH -t 4:00:00
-#SBATCH -o /lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v5_patB/38_v5_patB.out
-#SBATCH -e /lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v5_patB/38_v5_patB.err
+#SBATCH -o /lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden/output_v5_patB/38_v5_patB.out
+#SBATCH -e /lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden/output_v5_patB/38_v5_patB.err
 
 # ファイル名: 05_sample_burden_v5_patB.sbatch
 # 処理内容:
@@ -23,7 +23,7 @@
 #         n_samples_event_only_dropped, n_events_kept, n_raw_rows) を追加
 #       * 統計・カラム生成ロジックは v4 と完全一致
 #   - 入力: Step 04 v11 patB 出力
-#       /lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v11_patB/
+#       /lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v11_patB/
 #         sample_boundary_event_overlap_v11_patB.tsv.gz
 #         sample_mechanistic_burden_v11_patB.tsv
 #   - 出力: output_v5_patB/
@@ -33,7 +33,7 @@
 #   - 実行時間を記録
 
 set -euo pipefail
-SCRIPT_DIR="/lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden"
+SCRIPT_DIR="/lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden"
 OUT_DIR="${SCRIPT_DIR}/output_v5_patB"
 mkdir -p "${OUT_DIR}"
 

@@ -29,11 +29,11 @@
 #       5. 出力 dir / file: output_v3 -> output_v4
 #       6. 解析ロジック (A1/A2/A3/A3-strict、Logit main + Firth sensitivity、
 #          BH/Holm) は v3 と完全一致
-#   - 期待結果: tad04292026/output_v3 と数値 bit-identical
+#   - 期待結果: tad04212026/output_v3 と数値 bit-identical
 #   - 依存: Module 02 v3 + Module 04 v10 + Module 05 v4 の出力 (NIG 上で完了済)
 #       tad04292026/02_bin_l2_annotation/output_v3/bin_l2_annotation_v3.tsv.gz
-#       tad04292026/04_wgs_sv_boundary_overlap/output_v10/sample_boundary_event_overlap_v10.tsv.gz
-#         (※ Module 04 は tad04292026 から copy back 済)
+#       tad04212026/04_wgs_sv_boundary_overlap/output_v10/sample_boundary_event_overlap_v10.tsv.gz
+#         (※ Module 04 は tad04212026 から copy back 済)
 #       tad04292026/05_wgs_sample_burden/output_v4/sample_burden_L2_and_specificity_v4.tsv
 #       /lustre12/home/kushima-pg/annotationInfo/gencode.v46.annotation.gtf.gz
 #   - fit モデル総数: 56 fit (v3 と同一)

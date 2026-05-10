@@ -29,7 +29,7 @@ t0 = time.time()
 ANNOT_DIR = Path('/lustre12/home/kushima-pg/annotationInfo')
 GENCODE_GTF = ANNOT_DIR / 'gencode.v46.annotation.gtf.gz'
 GNOMAD_LOEUF = ANNOT_DIR / 'gnomad.v2.1.1.lof_metrics.by_gene.txt.bgz'
-BASE_DIR = Path('/lustre12/home/kushima-pg/tad04292026')
+BASE_DIR = Path('/lustre12/home/kushima-pg/tad04212026')
 DOM_BED = BASE_DIR / '14_constraint_enrichment_v1/output_v1/static_bounded_domains_v1.bed'
 OUT_DIR = BASE_DIR / '14_constraint_enrichment_v1/output_v1'
 

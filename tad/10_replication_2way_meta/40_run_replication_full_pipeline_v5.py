@@ -8,15 +8,15 @@
   - v4 -> v5 変更点 (WGS discovery sample-level top-1% CNV count QC 伝播のための
     path update のみ。arrayCGH v22 / MSSNG 入力は従来通り):
       * WGS_PRIMARY_OUT_DIR:
-          tad04292026/06_wgs_primary_L2/output_v3
-          -> tad04292026/06_wgs_primary_L2/output_v4
+          tad04212026/06_wgs_primary_L2/output_v3
+          -> tad04212026/06_wgs_primary_L2/output_v4
       * WGS_L2_RESULTS:
           B_prime_L2_classes_results_v3.tsv -> _v4.tsv
       * WGS_SPEC_RESULTS:
           B_prime_specificity_groups_results_v3.tsv -> _v4.tsv
       * OUT_DIR:
-          tad04292026/10_replication_2way_meta/output_v4
-          -> tad04292026/10_replication_2way_meta/output_v5
+          tad04212026/10_replication_2way_meta/output_v4
+          -> tad04212026/10_replication_2way_meta/output_v5
       * 全出力 TSV の suffix: _v4 -> _v5
       * ACGH/MSSNG/BIN_ANNOTATION は v4 と同一 (read-only 据え置き)
       * 解析ロジック (Step A/B/C/D) は v4 と完全一致
@@ -28,7 +28,7 @@
     MSSNG は元 overlap が既に DEL-only で抽出済み)。
 
   - Step A (burden):
-      arrayCGH: sample_event_bin_overlap_v22.tsv.gz (tad04292026 v22) を
+      arrayCGH: sample_event_bin_overlap_v22.tsv.gz (tad04212026 v22) を
                 bin_l2_annotation_v2 と join
       MSSNG   : mssng_sample_event_bin_overlap_v1.tsv.gz を bin_l2_annotation_v2 と join
 
@@ -40,7 +40,7 @@
       arrayCGH ASD_vs_CONT beta/se と MSSNG ASD_vs_unaffSib beta/se を IVW.
 
   - Step D (3-way meta):
-      WGS primary v4 (tad04292026 06_wgs_primary_L2 output_v4, ASD_vs_HC, DEL)
+      WGS primary v4 (tad04212026 06_wgs_primary_L2 output_v4, ASD_vs_HC, DEL)
         + arrayCGH v22 (ASD_vs_CONT, DEL)
         + MSSNG (ASD_vs_unaffSib, DEL)
       IVW fixed-effect. N-cohort Cochran's Q / I^2 付き.
@@ -50,7 +50,7 @@
 使い方:
   python 40_run_replication_full_pipeline_v5.py
 
-出力 (OUT_DIR = tad04292026/10_replication_2way_meta/output_v5 に配置):
+出力 (OUT_DIR = tad04212026/10_replication_2way_meta/output_v5 に配置):
   [burden]
     arraycgh_burden_L2_and_specificity_v5.tsv
     mssng_burden_L2_and_specificity_v5.tsv
@@ -92,11 +92,11 @@ warnings.filterwarnings("ignore")
 # =========================================================
 # arrayCGH 入力 (v4 と同一; WGS top-1% QC は WGS discovery のみ適用、arrayCGH は不変)
 ACGH_OVERLAP = Path(
-    "/lustre12/home/kushima-pg/tad04292026/08_arraycgh_sample_burden/"
+    "/lustre12/home/kushima-pg/tad04212026/08_arraycgh_sample_burden/"
     "output_v22/sample_event_bin_overlap_v22.tsv.gz"
 )
 ACGH_COVARIATES = Path(
-    "/lustre12/home/kushima-pg/tad04292026/08_arraycgh_sample_burden/"
+    "/lustre12/home/kushima-pg/tad04212026/08_arraycgh_sample_burden/"
     "output_v22/sample_covariates_v22.tsv"
 )
 # MSSNG 入力 (v4 と同一)
@@ -110,22 +110,22 @@ MSSNG_COVARIATES = Path(
 )
 # bin_annotation (v4 と同一)
 BIN_ANNOTATION = Path(
-    "/lustre12/home/kushima-pg/tad04292026/02_bin_l2_annotation/"
+    "/lustre12/home/kushima-pg/tad04212026/02_bin_l2_annotation/"
     "output_v2/bin_l2_annotation_v2.tsv.gz"
 )
-# v5 CHANGE: WGS primary を tad04292026 Step 6 v4 出力へ切り替え
+# v5 CHANGE: WGS primary を tad04212026 Step 6 v4 出力へ切り替え
 # (v4 = sample-level top-1% CNV count QC 適用済みの WGS discovery fit 結果)
 # 39_fit_B_prime_L2_and_specificity_v4.R の出力を参照する。
 # comparison=ASD_vs_HC, sv_type=DEL のフィルタ仕様は v3 と同一。
 WGS_PRIMARY_OUT_DIR = Path(
-    "/lustre12/home/kushima-pg/tad04292026/06_wgs_primary_L2/output_v4"
+    "/lustre12/home/kushima-pg/tad04212026/06_wgs_primary_L2/output_v4"
 )
 WGS_L2_RESULTS = WGS_PRIMARY_OUT_DIR / "B_prime_L2_classes_results_v4.tsv"
 WGS_SPEC_RESULTS = WGS_PRIMARY_OUT_DIR / "B_prime_specificity_groups_results_v4.tsv"
 
-# v5 CHANGE: OUT_DIR を tad04292026/10_replication_2way_meta/output_v5 へ変更
+# v5 CHANGE: OUT_DIR を tad04212026/10_replication_2way_meta/output_v5 へ変更
 OUT_DIR = Path(
-    "/lustre12/home/kushima-pg/tad04292026/10_replication_2way_meta/output_v5"
+    "/lustre12/home/kushima-pg/tad04212026/10_replication_2way_meta/output_v5"
 )
 
 MIN_CELL_COUNT = 5
@@ -607,7 +607,7 @@ def ivw_meta_nway(betas: List[float], ses: List[float]) -> dict:
 # =========================================================
 def load_wgs_primary_results(l2_path: Path, spec_path: Path) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Load tad04292026 06_wgs_primary_L2 output_v4 (R script
+    Load tad04212026 06_wgs_primary_L2 output_v4 (R script
     39_fit_B_prime_L2_and_specificity_v4) outputs and filter to
     comparison = ASD_vs_HC, sv_type = DEL.
     """
@@ -846,9 +846,9 @@ def main() -> None:
     log(f"  mssng_overlap:    {MSSNG_OVERLAP}")
     log(f"  mssng_covariates: {MSSNG_COVARIATES}")
     log(f"  bin_annotation:   {BIN_ANNOTATION}")
-    log(f"  wgs_L2_results:   {WGS_L2_RESULTS}   [v5: from tad04292026 v4 (top-1% QC applied)]")
-    log(f"  wgs_spec_results: {WGS_SPEC_RESULTS} [v5: from tad04292026 v4 (top-1% QC applied)]")
-    log(f"  outdir:           {OUT_DIR}         [v5: tad04292026/10_replication_2way_meta/output_v5]")
+    log(f"  wgs_L2_results:   {WGS_L2_RESULTS}   [v5: from tad04212026 v4 (top-1% QC applied)]")
+    log(f"  wgs_spec_results: {WGS_SPEC_RESULTS} [v5: from tad04212026 v4 (top-1% QC applied)]")
+    log(f"  outdir:           {OUT_DIR}         [v5: tad04212026/10_replication_2way_meta/output_v5]")
     log(f"  min_cell_count:   {MIN_CELL_COUNT}")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 

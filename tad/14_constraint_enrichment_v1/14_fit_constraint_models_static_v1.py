@@ -38,7 +38,7 @@ import statsmodels.api as sm
 
 t0 = time.time()
 
-BASE_DIR = Path('/lustre12/home/kushima-pg/tad04292026')
+BASE_DIR = Path('/lustre12/home/kushima-pg/tad04212026')
 OUT_DIR = BASE_DIR / '14_constraint_enrichment_v1/output_v1'
 
 EXPOSURE_DISC = OUT_DIR / 'sample_constraint_burden_discovery_static_v1.tsv'

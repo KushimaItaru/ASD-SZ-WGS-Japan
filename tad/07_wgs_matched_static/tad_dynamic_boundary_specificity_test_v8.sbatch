@@ -24,10 +24,10 @@
 #
 #   - 依存 (v7 と同一):
 #       Step 04 v10:
-#         tad04292026/04_wgs_sv_boundary_overlap/output_v10/
+#         tad04212026/04_wgs_sv_boundary_overlap/output_v10/
 #           sample_boundary_event_overlap_v10.tsv.gz
 #       Step 05 v3:
-#         tad04292026/05_wgs_sample_burden/output_v3/
+#         tad04212026/05_wgs_sample_burden/output_v3/
 #           sample_burden_L2_and_specificity_v3.tsv
 #       paths_v1 経由 (変更なし):
 #         Heffel L2 diffbound BED / BrainDev_raw.boundary.h5ad
@@ -51,9 +51,9 @@
 #
 #   - 投入手順:
 #       (1) 既存 output_tad_dynamic_boundary_specificity_v7_L2/ を待避:
-#             cd /lustre12/home/kushima-pg/tad04292026/07_wgs_matched_static
+#             cd /lustre12/home/kushima-pg/tad04212026/07_wgs_matched_static
 #             mv output_tad_dynamic_boundary_specificity_v7_L2 output_tad_dynamic_boundary_specificity_v7_L2_1000resamples_BAK
-#       (2) v8 sbatch を tad04292026/07_wgs_matched_static/ に転送し sbatch:
+#       (2) v8 sbatch を tad04212026/07_wgs_matched_static/ に転送し sbatch:
 #             sbatch tad_dynamic_boundary_specificity_test_v8.sbatch
 #       (3) 11 array task すべて完了後、出力ファイルが揃っているか確認:
 #             ls output_tad_dynamic_boundary_specificity_v7_L2/specificity_test_main_v7_L2_*.tsv | wc -l   # → 11
@@ -66,8 +66,8 @@
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=128G
 #SBATCH --time=60:00:00
-#SBATCH --output=/lustre12/home/kushima-pg/tad04292026/07_wgs_matched_static/tad_spec_v8_array%A_%a.log
-#SBATCH --error=/lustre12/home/kushima-pg/tad04292026/07_wgs_matched_static/tad_spec_v8_array%A_%a.err
+#SBATCH --output=/lustre12/home/kushima-pg/tad04212026/07_wgs_matched_static/tad_spec_v8_array%A_%a.log
+#SBATCH --error=/lustre12/home/kushima-pg/tad04212026/07_wgs_matched_static/tad_spec_v8_array%A_%a.err
 
 set -euo pipefail
 
@@ -119,7 +119,7 @@ echo "RUN_EVENT_LEVEL=${RUN_EVENT_LEVEL}"
 echo "RUN_FLANKING_CONTROL=${RUN_FLANKING_CONTROL}"
 echo "==============================================="
 
-cd /lustre12/home/kushima-pg/tad04292026/07_wgs_matched_static
+cd /lustre12/home/kushima-pg/tad04212026/07_wgs_matched_static
 mkdir -p "output_tad_dynamic_boundary_specificity_v7_L${MATCH_LEVEL}"
 
 python3 tad_dynamic_boundary_specificity_test_v7.py

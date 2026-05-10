@@ -4,7 +4,7 @@
 # - 処理内容:
 #   - v8 (Pattern A = NAHR-excluded) を継承し、1 回の実行で Pattern A/B/C の
 #     3 rare SV event table を生成する。感度分析 (unified_heffel_tad_pipeline_v20
-#     の Pattern B/C 解析) を新パイプライン (tad04292026/) に移植したもの。
+#     の Pattern B/C 解析) を新パイプライン (tad04212026/) に移植したもの。
 #
 #   - 共通 QC (v8 と同一、事前に全 Pattern 共通):
 #       1. Annotation_mode == full

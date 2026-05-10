@@ -48,7 +48,7 @@ from bisect import bisect_left, bisect_right
 
 t0 = time.time()
 
-BASE_DIR = Path('/lustre12/home/kushima-pg/tad04292026')
+BASE_DIR = Path('/lustre12/home/kushima-pg/tad04212026')
 OUT_DIR = BASE_DIR / '14_constraint_enrichment_v1/output_v1'
 ANNOT_DIR = Path('/lustre12/home/kushima-pg/annotationInfo')
 GENCODE_GTF = ANNOT_DIR / 'gencode.v46.annotation.gtf.gz'

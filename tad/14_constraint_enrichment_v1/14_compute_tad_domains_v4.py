@@ -16,7 +16,7 @@
   - boundary bin に left/right flanking domain を mapping
 
 入力:
-- /lustre12/home/kushima-pg/tad04292026/02_bin_l2_annotation/output_v2/bin_l2_annotation_v2.tsv.gz
+- /lustre12/home/kushima-pg/tad04212026/02_bin_l2_annotation/output_v2/bin_l2_annotation_v2.tsv.gz
 
 出力:
 - output_v1/tad_domains_v4.bed
@@ -32,7 +32,7 @@ from pathlib import Path
 
 t0 = time.time()
 
-BASE_DIR = Path('/lustre12/home/kushima-pg/tad04292026')
+BASE_DIR = Path('/lustre12/home/kushima-pg/tad04212026')
 BIN_ANNOT = BASE_DIR / '02_bin_l2_annotation/output_v2/bin_l2_annotation_v2.tsv.gz'
 OUT_DIR = BASE_DIR / '14_constraint_enrichment_v1/output_v1'
 OUT_DIR.mkdir(parents=True, exist_ok=True)

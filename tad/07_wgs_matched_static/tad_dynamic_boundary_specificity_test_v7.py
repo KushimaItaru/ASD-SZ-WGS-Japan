@@ -49,7 +49,7 @@
 #   17. デフォルトを MATCH_LEVEL=2, N_RESAMPLES=1000 に変更（引数なしで本番実行可能に）
 #   18. 出力ディレクトリ名を v5 に更新
 #
-# v6 修正点 (tad04292026 pipeline 移行):
+# v6 修正点 (tad04212026 pipeline 移行):
 #   19. common.paths_v1 から中央管理パスを取得（_BASEDIR / _L2_DIFFBOUND_DIR / _RAW_H5AD /
 #       _OVERLAP_TABLE / _BURDEN_TABLE / _GTF_FILE / _SEGDUP_BED / _OUTDIR をすべて paths_v1
 #       の定数に置換）
@@ -122,7 +122,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-# v6: tad04292026 pipeline - centralized paths via common.paths_v1
+# v6: tad04212026 pipeline - centralized paths via common.paths_v1
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths_v1 import (
     HEFFEL_L2_DIFF_DOMAIN_BOUNDARIES,
@@ -146,8 +146,8 @@ warnings.filterwarnings("ignore")
 
 _L2_DIFFBOUND_DIR = str(HEFFEL_L2_DIFF_DOMAIN_BOUNDARIES)
 _RAW_H5AD = str(HEFFEL_DOMAIN_BOUNDARIES / "BrainDev_raw.boundary.h5ad")
-_OVERLAP_TABLE = "/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v10/sample_boundary_event_overlap_v10.tsv.gz"  # v7: top-1% CNV count QC 適用後 (paths_v1 を override)
-_BURDEN_TABLE = "/lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v3/sample_burden_L2_and_specificity_v3.tsv"  # v7: top-1% CNV count QC 適用後 (paths_v1 を override)
+_OVERLAP_TABLE = "/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v10/sample_boundary_event_overlap_v10.tsv.gz"  # v7: top-1% CNV count QC 適用後 (paths_v1 を override)
+_BURDEN_TABLE = "/lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden/output_v3/sample_burden_L2_and_specificity_v3.tsv"  # v7: top-1% CNV count QC 適用後 (paths_v1 を override)
 _GTF_FILE = str(GENCODE_GTF)
 _SEGDUP_BED = str(SEGDUP_BED)
 

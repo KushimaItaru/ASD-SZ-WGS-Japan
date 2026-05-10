@@ -3,8 +3,8 @@
 
 # ファイル名: tad_replication_meta_analysis_v12.py
 # 処理内容:
-#   - arrayCGH(v22, tad04292026 08_arraycgh_sample_burden/output_v22) と
-#     MSSNG(v18, tad04292026 09_mssng_sample_burden/output_v18) の
+#   - arrayCGH(v22, tad04212026 08_arraycgh_sample_burden/output_v22) と
+#     MSSNG(v18, tad04212026 09_mssng_sample_burden/output_v18) の
 #     replication 結果 TSV を読み込む
 #   - PRIMARY / SECONDARY Pattern C / negative control を cohort 間で対応付け
 #   - Main meta: IVW fixed-effect meta-analysis
@@ -12,12 +12,12 @@
 #   - PRIMARY main / exploratory / negative control ごとに TSV 出力
 #   - 実行時間をログ出力
 #
-# v11 から v12 への変更点 (2026-04-21 tad04292026 パイプライン移植):
-#   1. arrayCGH 入力: v21 -> v22 (tad04292026/08_arraycgh_sample_burden/output_v22)
+# v11 から v12 への変更点 (2026-04-21 tad04212026 パイプライン移植):
+#   1. arrayCGH 入力: v21 -> v22 (tad04212026/08_arraycgh_sample_burden/output_v22)
 #      解析ロジックは v21 と同一 (filename と path のみ更新)。
-#   2. MSSNG 入力: v17 -> v18 (tad04292026/09_mssng_sample_burden/output_v18)
+#   2. MSSNG 入力: v17 -> v18 (tad04212026/09_mssng_sample_burden/output_v18)
 #      解析ロジックは v17 と同一 (filename と path のみ更新)。
-#   3. 出力: /lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden/meta_v12
+#   3. 出力: /lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/meta_v12
 #      出力ファイル名サフィックスを _v11 -> _v12 に更新。
 #   4. cohort ラベルを "arrayCGH_v22" / "MSSNG_v18_fullfamily" に更新。
 #   5. メタ解析ロジック (IVW, Stouffer, analysis_set 判定) は v11 から一切変更なし。
@@ -73,11 +73,11 @@ from scipy.stats import norm, chi2
 # CONFIG
 # ============================================================
 
-_BASEDIR_ARRAY = "/lustre12/home/kushima-pg/tad04292026/08_arraycgh_sample_burden/output_v22"
-_BASEDIR_MSSNG = "/lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden/output_v18"
+_BASEDIR_ARRAY = "/lustre12/home/kushima-pg/tad04212026/08_arraycgh_sample_burden/output_v22"
+_BASEDIR_MSSNG = "/lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/output_v18"
 _DEFAULT_ARRAY_TSV = f"{_BASEDIR_ARRAY}/tad_replication_asd_vs_cont_v22.tsv"
 _DEFAULT_MSSNG_TSV = f"{_BASEDIR_MSSNG}/tad_replication_mssng_v18.tsv"
-_DEFAULT_OUTDIR = "/lustre12/home/kushima-pg/tad04292026/09_mssng_sample_burden/meta_v12"
+_DEFAULT_OUTDIR = "/lustre12/home/kushima-pg/tad04212026/09_mssng_sample_burden/meta_v12"
 
 ARRAY_TSV = os.environ.get("ARRAY_TSV", _DEFAULT_ARRAY_TSV)
 MSSNG_TSV = os.environ.get("MSSNG_TSV", _DEFAULT_MSSNG_TSV)
@@ -594,9 +594,9 @@ def save_outputs(meta_df: pd.DataFrame, outdir: str) -> None:
         "script": "tad_replication_meta_analysis_v12.py",
         "version": "v12",
         "changes_from_v11": [
-            "arrayCGH input updated: v21 -> v22 (tad04292026/08_arraycgh_sample_burden/output_v22)",
-            "MSSNG input updated: v17 -> v18 (tad04292026/09_mssng_sample_burden/output_v18)",
-            "OUTDIR updated: tad04292026/09_mssng_sample_burden/meta_v12",
+            "arrayCGH input updated: v21 -> v22 (tad04212026/08_arraycgh_sample_burden/output_v22)",
+            "MSSNG input updated: v17 -> v18 (tad04212026/09_mssng_sample_burden/output_v18)",
+            "OUTDIR updated: tad04212026/09_mssng_sample_burden/meta_v12",
             "Output TSV suffixes: _v11 -> _v12",
             "Cohort labels: arrayCGH_v22, MSSNG_v18_fullfamily",
             "Meta logic (IVW, Stouffer, analysis_set classification) UNCHANGED from v11",
@@ -619,9 +619,9 @@ def save_outputs(meta_df: pd.DataFrame, outdir: str) -> None:
         "discovery_sig_classes": DISCOVERY_SIG_CLASSES,
         "discovery_nonsig_classes": DISCOVERY_NONSIG_CLASSES,
         "arraycgh_version": "v22",
-        "arraycgh_inference": "Platform-stratified Logit+LRT -> IVW fixed-effect meta (v22, tad04292026 pipeline)",
+        "arraycgh_inference": "Platform-stratified Logit+LRT -> IVW fixed-effect meta (v22, tad04212026 pipeline)",
         "mssng_version": "v18_full_family",
-        "mssng_inference": "GEE Independence (v18, tad04292026 pipeline)",
+        "mssng_inference": "GEE Independence (v18, tad04212026 pipeline)",
         "qc_alignment": "All cohorts apply: segdup < 50%, exclusion BED < 50% (unified with WGS v18)",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
@@ -706,7 +706,7 @@ def main() -> None:
     log("  PRIMARY nonsig2 = IVW two-sided for exploratory")
     log("  Pattern C = IVW (same rules as PRIMARY)")
     log("  Negative controls = IVW two-sided")
-    log("  v12 change: arrayCGH v21 -> v22, MSSNG v17 -> v18 (tad04292026 pipeline)")
+    log("  v12 change: arrayCGH v21 -> v22, MSSNG v17 -> v18 (tad04212026 pipeline)")
     log("  arrayCGH v22 (platform-meta, segdup/excl filtered) + MSSNG v18 input")
     log("=" * 70)
 

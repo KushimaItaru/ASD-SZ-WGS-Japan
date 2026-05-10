@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=6:00:00
-#SBATCH --output=/lustre12/home/kushima-pg/tad04292026/03_wgs_sv_events/output_v9/03_sv_v9_%j.log
-#SBATCH --error=/lustre12/home/kushima-pg/tad04292026/03_wgs_sv_events/output_v9/03_sv_v9_%j.err
+#SBATCH --output=/lustre12/home/kushima-pg/tad04212026/03_wgs_sv_events/output_v9/03_sv_v9_%j.log
+#SBATCH --error=/lustre12/home/kushima-pg/tad04212026/03_wgs_sv_events/output_v9/03_sv_v9_%j.err
 
 # ファイル名: 03_extract_sv_v9.sbatch
 # 処理内容:
@@ -48,7 +48,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="/lustre12/home/kushima-pg/tad04292026/03_wgs_sv_events"
+SCRIPT_DIR="/lustre12/home/kushima-pg/tad04212026/03_wgs_sv_events"
 OUT_DIR="${SCRIPT_DIR}/output_v9"
 mkdir -p "${OUT_DIR}"
 

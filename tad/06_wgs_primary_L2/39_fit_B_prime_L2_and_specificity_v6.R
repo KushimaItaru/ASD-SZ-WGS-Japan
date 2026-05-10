@@ -89,7 +89,7 @@ if (!(PATTERN %in% c("patB", "patC"))) {
 }
 V6_SUFFIX <- sprintf("v6_%s", PATTERN)
 
-PIPELINE_ROOT  <- "/lustre12/home/kushima-pg/tad04292026"
+PIPELINE_ROOT  <- "/lustre12/home/kushima-pg/tad04212026"
 MANIFEST_PATH  <- file.path(PIPELINE_ROOT, "common", "paths_v1_manifest.json")
 if (!file.exists(MANIFEST_PATH)) {
   stop(sprintf(

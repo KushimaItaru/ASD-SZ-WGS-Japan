@@ -1,0 +1,462 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# 39_fit_B_prime_L2_and_specificity_v3.R
+# -----------------------------------------------------------------------------
+# 変更点 (v2 -> v3):
+#   - tad04212026/ パイプラインに移行
+#   - 引数なし実行可能（デフォルト値を tad04212026 パス系に設定）
+#   - 入力: 05 の sample_burden_L2_and_specificity_v2.tsv
+#   - 出力: 06_wgs_primary_L2/output_v3/B_prime_*_v3.tsv
+# 変更点 (v1 -> v2):
+#   - optparse 依存を撤廃し、base R の commandArgs による引数解析に置き換え
+#     (遺伝研スパコン (ngs) env に optparse が入っていなかったため)
+# 処理内容:
+#   - 38 で作成した sample_burden_L2_and_specificity_v2.tsv を入力に
+#     v200 Fig.3a / Supp Table 5 Panel A (10 L2 classes) と
+#     specificity-group factorial (Supp Table 6 Panel C in v200/v203 → updated in v204) の
+#     B' logistic regression を fit する
+#   - 解析 (i): 10 L2 classes (HPC_Astro 除外)
+#       ["HPC_Exc-CA","HPC_Exc-DG","HPC_Exc-ENT",
+#        "HPC_Inh-CGE","HPC_Inh-MGE",
+#        "PFC_Astro","PFC_Exc-DL","PFC_Exc-UL",
+#        "PFC_Inh-CGE","PFC_Inh-MGE"]
+#   - 解析 (ii): 5 group definitions (37/38 で計算済み)
+#       group_primary : Diff_specific_n1 / Diff_shared_n2plus / Static
+#       group_s2      : Diff_specific_n1or2 / Diff_shared_n3plus / Static
+#       group_s3      : Diff_specific_n1to3 / Diff_shared_n4plus / Static
+#       group_s4      : Diff_specific_n1 / Diff_excluded_n2 / Diff_shared_n3plus / Static
+#       group_s5      : Diff_specific_n1 / Diff_middle_n2to4 / Diff_shared_n5plus / Static
+#   - 3 exposure:  bin-count (n_boundary) / event-count (n_events) / carrier
+#   - 3 comparison: ASD vs HC, SZ vs HC, ASD vs SZ
+#   - 2 SV type:   DEL / DUP
+#   - B' model:
+#       case ~ exposure
+#            + Sex_numeric
+#            + PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10
+#            + log1p_total_{del|dup}_bases   (SV type に合わせて切替)
+#            + log1p_total_gene_{DEL|DUP}    (SV type に合わせて切替)
+#   - 実行時間記録あり
+# 使い方:
+#   Rscript 39_fit_B_prime_L2_and_specificity_v3.R \
+#     --burden <sample_burden_L2_and_specificity_v2.tsv> \
+#     --outdir <outdir> \
+#     [--min-cell-count 5]
+# 出力:
+#   B_prime_L2_classes_results_v3.tsv        (解析 i)
+#   B_prime_specificity_groups_results_v3.tsv (解析 ii)
+#   B_prime_run_summary_v3.tsv               (fit 成否サマリ)
+# =============================================================================
+
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(tidyr)
+  library(readr)
+  library(stringr)
+  library(purrr)
+  library(tibble)
+  library(jsonlite)  # v3 (2026-04-21): read paths_v1_manifest.json from Python
+})
+
+# -------------------------------------------------------------
+# utility
+# -------------------------------------------------------------
+log_msg <- function(msg) {
+  cat(sprintf("[%s] %s\n",
+              format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+              msg))
+  flush.console()
+}
+
+# -------------------------------------------------------------
+# minimal argparse (base R)
+# -------------------------------------------------------------
+parse_cli_args <- function(raw) {
+  # support "--key value" and "--key=value"
+  out <- list()
+  i <- 1
+  while (i <= length(raw)) {
+    tok <- raw[i]
+    if (!startsWith(tok, "--")) {
+      stop(sprintf("Unexpected positional argument: '%s'", tok))
+    }
+    key <- sub("^--", "", tok)
+    if (grepl("=", key, fixed = TRUE)) {
+      kv <- strsplit(key, "=", fixed = TRUE)[[1]]
+      out[[kv[1]]] <- paste(kv[-1], collapse = "=")
+      i <- i + 1
+    } else {
+      if (i + 1 > length(raw)) {
+        stop(sprintf("Argument --%s requires a value.", key))
+      }
+      out[[key]] <- raw[i + 1]
+      i <- i + 2
+    }
+  }
+  out
+}
+
+# -------------------------------------------------------------
+# v3 (2026-04-21): read paths_v1_manifest.json (Python single-source-of-truth)
+# Python side: common/paths_v1.export_r_manifest() writes this JSON.
+# The SBATCH wrapper must call:
+#   python3 -c "from common.paths_v1 import export_r_manifest; export_r_manifest()"
+# BEFORE invoking this R script.
+# -------------------------------------------------------------
+PIPELINE_ROOT  <- "/lustre12/home/kushima-pg/tad04212026"
+MANIFEST_PATH  <- file.path(PIPELINE_ROOT, "common", "paths_v1_manifest.json")
+if (!file.exists(MANIFEST_PATH)) {
+  stop(sprintf(
+    "paths_v1_manifest.json not found at %s. Run 'python3 -c \"from common.paths_v1 import export_r_manifest; export_r_manifest()\"' first.",
+    MANIFEST_PATH))
+}
+manifest       <- jsonlite::fromJSON(MANIFEST_PATH, simplifyVector = TRUE)
+DEFAULT_BURDEN <- manifest$F_05_SAMPLE_BURDEN_L2
+DEFAULT_OUTDIR <- manifest$OUT_06_B_PRIME_L2
+
+raw_args <- commandArgs(trailingOnly = TRUE)
+opt <- if (length(raw_args) > 0) parse_cli_args(raw_args) else list()
+burden_path <- ifelse(is.null(opt$burden),  DEFAULT_BURDEN, opt$burden)
+outdir      <- ifelse(is.null(opt$outdir),  DEFAULT_OUTDIR, opt$outdir)
+min_cell    <- as.integer(ifelse(is.null(opt[["min-cell-count"]]),
+                                 5L, opt[["min-cell-count"]]))
+dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
+
+# -------------------------------------------------------------
+# constants
+# -------------------------------------------------------------
+# Phase F (2026-04-21): manifest を single source of truth として採用。
+# hardcoded list は後方互換のため保持し、stopifnot() で manifest と一致確認。
+L2_CLASSES_HARDCODE <- c(
+  "HPC_Exc-CA", "HPC_Exc-DG", "HPC_Exc-ENT",
+  "HPC_Inh-CGE", "HPC_Inh-MGE",
+  "PFC_Astro", "PFC_Exc-DL", "PFC_Exc-UL",
+  "PFC_Inh-CGE", "PFC_Inh-MGE"
+)
+stopifnot(
+  "Manifest L2_CLASSES mismatch with R hardcoded list" =
+    identical(sort(L2_CLASSES_HARDCODE), sort(as.character(manifest$L2_CLASSES)))
+)
+# Phase G (2026-04-21): BIN_SIZE_BP は R 側ロジックで未使用のため削除。
+# 必要になった時は manifest$BIN_SIZE_BP を再導入し、その時点で stopifnot を追加する。
+L2_CLASSES <- as.character(manifest$L2_CLASSES)
+
+GROUP_COLUMNS <- c("group_primary", "group_s2", "group_s3", "group_s4", "group_s5")
+SV_TYPES      <- c("DEL", "DUP")
+EXPOSURES     <- c("n_boundary", "n_events", "carrier_boundary")
+
+COMPARISONS <- list(
+  list(name = "ASD_vs_HC", case = "ASD",     control = "Healthy"),
+  list(name = "SZ_vs_HC",  case = "SZ",      control = "Healthy"),
+  list(name = "ASD_vs_SZ", case = "ASD",     control = "SZ")
+)
+
+FIXED_COVS <- c(
+  "Sex_numeric",
+  "PC1","PC2","PC3","PC4","PC5","PC6","PC7","PC8","PC9","PC10"
+)
+
+t0 <- Sys.time()
+log_msg(strrep("=", 60))
+log_msg("Start 39_fit_B_prime_L2_and_specificity_v3.R")
+log_msg(sprintf("  burden: %s", burden_path))
+log_msg(sprintf("  outdir: %s", outdir))
+log_msg(sprintf("  min_cell_count: %d", min_cell))
+
+# -------------------------------------------------------------
+# load burden
+# -------------------------------------------------------------
+log_msg("Loading burden table ...")
+bur <- read_tsv(burden_path, show_col_types = FALSE, guess_max = 50000)
+log_msg(sprintf("  dim = (%d, %d)", nrow(bur), ncol(bur)))
+
+required_cov <- c("sample_id", "Diagnosis",
+                  FIXED_COVS,
+                  "log1p_total_del_bases", "log1p_total_dup_bases",
+                  "log1p_total_gene_DEL",  "log1p_total_gene_DUP")
+missing_cov <- setdiff(required_cov, colnames(bur))
+if (length(missing_cov) > 0) {
+  stop(sprintf("Burden missing required covariates: %s",
+               paste(missing_cov, collapse = ", ")))
+}
+
+dx_tab <- table(bur$Diagnosis, useNA = "ifany")
+log_msg("Diagnosis distribution:")
+for (d in names(dx_tab)) {
+  log_msg(sprintf("  %s : %d", d, dx_tab[[d]]))
+}
+
+# -------------------------------------------------------------
+# helpers
+# -------------------------------------------------------------
+make_subset <- function(df, comp) {
+  sub <- df %>% filter(Diagnosis %in% c(comp$case, comp$control))
+  sub$case <- as.integer(sub$Diagnosis == comp$case)
+  sub
+}
+
+covariate_formula_terms <- function(sv_type) {
+  base <- FIXED_COVS
+  if (sv_type == "DEL") {
+    c(base, "log1p_total_del_bases", "log1p_total_gene_DEL")
+  } else if (sv_type == "DUP") {
+    c(base, "log1p_total_dup_bases", "log1p_total_gene_DUP")
+  } else {
+    stop(sprintf("Unknown sv_type: %s", sv_type))
+  }
+}
+
+fit_logit <- function(sub, exposure_col, sv_type, min_cell = 5) {
+  covs <- covariate_formula_terms(sv_type)
+  needed <- c("case", exposure_col, covs)
+  if (!all(needed %in% colnames(sub))) {
+    return(tibble(
+      n_case = NA_integer_, n_ctrl = NA_integer_,
+      carrier_case = NA_integer_, carrier_ctrl = NA_integer_,
+      mean_exp_case = NA_real_, mean_exp_ctrl = NA_real_,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = "missing_columns"
+    ))
+  }
+  d <- sub[, needed, drop = FALSE]
+  d <- d[complete.cases(d), , drop = FALSE]
+  if (nrow(d) == 0) {
+    return(tibble(
+      n_case = 0L, n_ctrl = 0L,
+      carrier_case = 0L, carrier_ctrl = 0L,
+      mean_exp_case = NA_real_, mean_exp_ctrl = NA_real_,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = "no_rows_complete"
+    ))
+  }
+
+  n_case <- sum(d$case == 1L)
+  n_ctrl <- sum(d$case == 0L)
+  carrier_case <- sum(d$case == 1L & d[[exposure_col]] >= 1)
+  carrier_ctrl <- sum(d$case == 0L & d[[exposure_col]] >= 1)
+  mean_exp_case <- mean(d[[exposure_col]][d$case == 1L])
+  mean_exp_ctrl <- mean(d[[exposure_col]][d$case == 0L])
+
+  if (length(unique(d[[exposure_col]])) < 2) {
+    return(tibble(
+      n_case = n_case, n_ctrl = n_ctrl,
+      carrier_case = carrier_case, carrier_ctrl = carrier_ctrl,
+      mean_exp_case = mean_exp_case, mean_exp_ctrl = mean_exp_ctrl,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = "exposure_no_variance"
+    ))
+  }
+  if ((carrier_case + carrier_ctrl) < min_cell) {
+    return(tibble(
+      n_case = n_case, n_ctrl = n_ctrl,
+      carrier_case = carrier_case, carrier_ctrl = carrier_ctrl,
+      mean_exp_case = mean_exp_case, mean_exp_ctrl = mean_exp_ctrl,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = "insufficient_carriers"
+    ))
+  }
+
+  rhs <- paste(c(sprintf("`%s`", exposure_col), covs), collapse = " + ")
+  form <- as.formula(sprintf("case ~ %s", rhs))
+
+  fit <- tryCatch(
+    suppressWarnings(glm(form, data = d, family = binomial(link = "logit"))),
+    error = function(e) e
+  )
+  if (inherits(fit, "error")) {
+    return(tibble(
+      n_case = n_case, n_ctrl = n_ctrl,
+      carrier_case = carrier_case, carrier_ctrl = carrier_ctrl,
+      mean_exp_case = mean_exp_case, mean_exp_ctrl = mean_exp_ctrl,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = sprintf("glm_error: %s", conditionMessage(fit))
+    ))
+  }
+
+  coefs <- summary(fit)$coefficients
+  target_name <- sprintf("`%s`", exposure_col)
+  row_idx <- which(rownames(coefs) %in% c(target_name, exposure_col))
+  if (length(row_idx) == 0) {
+    return(tibble(
+      n_case = n_case, n_ctrl = n_ctrl,
+      carrier_case = carrier_case, carrier_ctrl = carrier_ctrl,
+      mean_exp_case = mean_exp_case, mean_exp_ctrl = mean_exp_ctrl,
+      beta = NA_real_, se = NA_real_, z = NA_real_,
+      p_value = NA_real_, or = NA_real_,
+      or_lo95 = NA_real_, or_hi95 = NA_real_,
+      fit_status = "no_exposure_term"
+    ))
+  }
+  row <- coefs[row_idx[1], , drop = TRUE]
+  beta <- unname(row["Estimate"])
+  se   <- unname(row["Std. Error"])
+  z    <- unname(row["z value"])
+  p    <- unname(row["Pr(>|z|)"])
+  or   <- exp(beta)
+  or_lo <- exp(beta - 1.959964 * se)
+  or_hi <- exp(beta + 1.959964 * se)
+
+  status <- "ok"
+  if (!fit$converged) status <- "not_converged"
+  if (any(is.na(row))) status <- paste(status, "na_in_coef", sep = ";")
+
+  tibble(
+    n_case = n_case, n_ctrl = n_ctrl,
+    carrier_case = carrier_case, carrier_ctrl = carrier_ctrl,
+    mean_exp_case = mean_exp_case, mean_exp_ctrl = mean_exp_ctrl,
+    beta = beta, se = se, z = z,
+    p_value = p, or = or,
+    or_lo95 = or_lo, or_hi95 = or_hi,
+    fit_status = status
+  )
+}
+
+# -------------------------------------------------------------
+# 解析 (i): 10 L2 classes
+# -------------------------------------------------------------
+log_msg("---- Analysis (i): 10 L2 classes -------------------")
+
+l2_rows <- list()
+for (l2 in L2_CLASSES) {
+  for (sv in SV_TYPES) {
+    for (exp_kind in EXPOSURES) {
+      col <- sprintf("%s_%s_%s", exp_kind, l2, sv)
+      for (cmp in COMPARISONS) {
+        sub <- make_subset(bur, cmp)
+        res <- fit_logit(sub, col, sv, min_cell = min_cell)
+        l2_rows[[length(l2_rows) + 1]] <- tibble(
+          analysis       = "L2_class",
+          L2_class       = l2,
+          sv_type        = sv,
+          exposure       = exp_kind,
+          exposure_col   = col,
+          comparison     = cmp$name,
+          case_label     = cmp$case,
+          control_label  = cmp$control,
+          !!!res
+        )
+      }
+    }
+  }
+  log_msg(sprintf("  [L2] done: %s", l2))
+}
+l2_tbl <- bind_rows(l2_rows)
+
+l2_tbl <- l2_tbl %>%
+  group_by(sv_type, exposure, comparison) %>%
+  mutate(p_fdr_within_stratum = p.adjust(p_value, method = "BH")) %>%
+  ungroup()
+
+out_l2 <- file.path(outdir, "B_prime_L2_classes_results_v3.tsv")
+log_msg(sprintf("Writing: %s", out_l2))
+write_tsv(l2_tbl, out_l2)
+
+# -------------------------------------------------------------
+# 解析 (ii): 5 group definitions
+# -------------------------------------------------------------
+log_msg("---- Analysis (ii): specificity groups -------------")
+
+grp_rows <- list()
+for (gcol in GROUP_COLUMNS) {
+  pattern <- sprintf("^carrier_boundary_%s__", gcol)
+  lbl_cols <- grep(pattern, colnames(bur), value = TRUE)
+  labels <- lbl_cols %>%
+    str_replace(pattern, "") %>%
+    str_replace("_(DEL|DUP)$", "") %>%
+    unique()
+  log_msg(sprintf("  [group] %s -> labels: %s",
+                  gcol, paste(labels, collapse = ", ")))
+
+  for (lbl in labels) {
+    for (sv in SV_TYPES) {
+      for (exp_kind in EXPOSURES) {
+        col <- sprintf("%s_%s__%s_%s", exp_kind, gcol, lbl, sv)
+        if (!col %in% colnames(bur)) next
+        for (cmp in COMPARISONS) {
+          sub <- make_subset(bur, cmp)
+          res <- fit_logit(sub, col, sv, min_cell = min_cell)
+          grp_rows[[length(grp_rows) + 1]] <- tibble(
+            analysis       = "specificity_group",
+            group_scheme   = gcol,
+            group_label    = lbl,
+            sv_type        = sv,
+            exposure       = exp_kind,
+            exposure_col   = col,
+            comparison     = cmp$name,
+            case_label     = cmp$case,
+            control_label  = cmp$control,
+            !!!res
+          )
+        }
+      }
+    }
+  }
+}
+grp_tbl <- bind_rows(grp_rows)
+
+grp_tbl <- grp_tbl %>%
+  group_by(group_scheme, sv_type, exposure, comparison) %>%
+  mutate(p_fdr_within_stratum = p.adjust(p_value, method = "BH")) %>%
+  ungroup()
+
+out_grp <- file.path(outdir, "B_prime_specificity_groups_results_v3.tsv")
+log_msg(sprintf("Writing: %s", out_grp))
+write_tsv(grp_tbl, out_grp)
+
+# -------------------------------------------------------------
+# 実行サマリ
+# -------------------------------------------------------------
+status_summary <- bind_rows(
+  l2_tbl  %>% mutate(block = "L2_class") %>% select(block, fit_status),
+  grp_tbl %>% mutate(block = "specificity_group") %>% select(block, fit_status)
+) %>%
+  count(block, fit_status)
+
+out_sum <- file.path(outdir, "B_prime_run_summary_v3.tsv")
+log_msg(sprintf("Writing: %s", out_sum))
+write_tsv(status_summary, out_sum)
+
+# -------------------------------------------------------------
+# preview
+# -------------------------------------------------------------
+log_msg("Top hits per block (by p_value):")
+
+log_msg("  -- L2 classes, carrier, Pattern-A (ASD/SZ vs HC), DEL --")
+print(
+  l2_tbl %>%
+    filter(exposure == "carrier_boundary",
+           comparison %in% c("ASD_vs_HC", "SZ_vs_HC"),
+           sv_type == "DEL") %>%
+    arrange(p_value) %>%
+    head(12) %>%
+    select(L2_class, comparison, n_case, n_ctrl,
+           carrier_case, carrier_ctrl,
+           or, or_lo95, or_hi95, p_value, fit_status)
+)
+
+log_msg("  -- group_primary, carrier, ASD_vs_HC | SZ_vs_HC, DEL --")
+print(
+  grp_tbl %>%
+    filter(group_scheme == "group_primary",
+           exposure == "carrier_boundary",
+           comparison %in% c("ASD_vs_HC", "SZ_vs_HC"),
+           sv_type == "DEL") %>%
+    arrange(comparison, group_label) %>%
+    select(group_label, comparison, n_case, n_ctrl,
+           carrier_case, carrier_ctrl,
+           or, or_lo95, or_hi95, p_value, fit_status)
+)
+
+elapsed <- difftime(Sys.time(), t0, units = "secs")
+log_msg(sprintf("Done. Elapsed: %.2f s = %.2f min",
+                as.numeric(elapsed), as.numeric(elapsed) / 60))
+log_msg(strrep("=", 60))

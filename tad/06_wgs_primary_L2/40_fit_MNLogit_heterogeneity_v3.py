@@ -62,7 +62,7 @@ import pandas as pd
 import statsmodels.api as sm
 from scipy import stats as scipy_stats
 
-# v2: tad04292026 pipeline - centralized paths via common.paths_v1
+# v2: tad04212026 pipeline - centralized paths via common.paths_v1
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from common.paths_v1 import (
     OUT_06_B_PRIME_L2,
@@ -81,7 +81,7 @@ warnings.filterwarnings("ignore")
 # 指すため override)。
 _BURDEN_TABLE = os.environ.get(
     "BURDEN",
-    "/lustre12/home/kushima-pg/tad04292026/05_wgs_sample_burden/output_v3/"
+    "/lustre12/home/kushima-pg/tad04212026/05_wgs_sample_burden/output_v3/"
     "sample_burden_L2_and_specificity_v3.tsv"
 )
 

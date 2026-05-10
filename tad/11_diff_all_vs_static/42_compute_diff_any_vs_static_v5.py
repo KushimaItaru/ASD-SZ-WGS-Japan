@@ -2,7 +2,7 @@
 # 42_compute_diff_any_vs_static_v5.py
 #
 # 処理内容:
-#  - Script 10 v5 (tad04292026 パイプライン、WGS discovery の top-1% sample-level
+#  - Script 10 v5 (tad04212026 パイプライン、WGS discovery の top-1% sample-level
 #    QC 経路を反映) の出力
 #       arraycgh_burden_L2_and_specificity_v5.tsv
 #       mssng_burden_L2_and_specificity_v5.tsv
@@ -55,17 +55,17 @@ from statsmodels.stats.multitest import multipletests
 
 
 # =========================================================
-# PATHS (tad04292026 パイプライン、v5: 10_v5 replication output を参照)
+# PATHS (tad04212026 パイプライン、v5: 10_v5 replication output を参照)
 # =========================================================
 REPLICATION_OUT_DIR = Path(
-    "/lustre12/home/kushima-pg/tad04292026/10_replication_2way_meta/output_v5"
+    "/lustre12/home/kushima-pg/tad04212026/10_replication_2way_meta/output_v5"
 )
 
 ACGH_BURDEN = REPLICATION_OUT_DIR / "arraycgh_burden_L2_and_specificity_v5.tsv"
 MSSNG_BURDEN = REPLICATION_OUT_DIR / "mssng_burden_L2_and_specificity_v5.tsv"
 
 OUT_DIR = Path(
-    "/lustre12/home/kushima-pg/tad04292026/11_diff_all_vs_static/output_v5"
+    "/lustre12/home/kushima-pg/tad04212026/11_diff_all_vs_static/output_v5"
 )
 OUT_TSV = OUT_DIR / "meta_diff_any_vs_static_v5.tsv"
 

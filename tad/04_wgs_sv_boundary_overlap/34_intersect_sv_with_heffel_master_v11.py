@@ -55,7 +55,7 @@
 #     (4) CLI 引数 --cnv-sample-counts, --high-burden-percentile を追加
 #         (default: paths_v1.CNV_SAMPLE_COUNTS, 0.99)
 #   - v9 からの主な変更点 (v9 由来):
-#     (1) tad04292026/ パイプラインに移行、common/paths_v1.py を使用
+#     (1) tad04212026/ パイプラインに移行、common/paths_v1.py を使用
 #     (2) 出力 suffix を v8 → v9 に更新
 #     (3) 引数なし実行可能（defaults を paths_v1 から提供）
 #     (4) 2026-04-21 追加: gene covariates 組込 + overlap_frac_boundary 0.10 default

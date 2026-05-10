@@ -24,7 +24,7 @@ History:
               Each external path is marked with `# CONFIGURE` for clarity.
               Module 02 v3 output (S2-S5 sensitivity grouping removed) is now
               the default: OUT_02_BIN_L2_ANNOT / bin_l2_annotation_v3.tsv.gz.
-              PIPELINE_ROOT default updated tad04292026 -> tad04292026.
+              PIPELINE_ROOT default updated tad04212026 -> tad04292026.
 """
 
 from __future__ import annotations
@@ -122,7 +122,7 @@ LINEAGE_XLSX = _envpath(
 # ============================================================================
 # PIPELINE ROOT (this re-analysis tree)
 # ============================================================================
-# 2026-04-29: PIPELINE_ROOT default updated tad04292026 -> tad04292026
+# 2026-04-29: PIPELINE_ROOT default updated tad04212026 -> tad04292026
 # (paper-aligned working repo with S2-S5 grouping removed and other paper-irrelevant
 # processes pruned).
 

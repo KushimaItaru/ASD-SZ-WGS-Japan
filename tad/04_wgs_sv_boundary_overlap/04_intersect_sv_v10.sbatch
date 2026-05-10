@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=3:00:00
-#SBATCH --output=/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v10/04_isec_v10_%j.log
-#SBATCH --error=/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v10/04_isec_v10_%j.err
+#SBATCH --output=/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v10/04_isec_v10_%j.log
+#SBATCH --error=/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v10/04_isec_v10_%j.err
 
 # ファイル名: 04_intersect_sv_v10.sbatch
 # 処理内容:
@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap"
+SCRIPT_DIR="/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap"
 OUT_DIR="${SCRIPT_DIR}/output_v10"
 mkdir -p "${OUT_DIR}"
 

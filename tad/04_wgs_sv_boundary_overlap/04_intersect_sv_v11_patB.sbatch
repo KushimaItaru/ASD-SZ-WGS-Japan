@@ -5,14 +5,14 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=3:00:00
-#SBATCH --output=/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v11_patB/04_isec_v11_patB_%j.log
-#SBATCH --error=/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap/output_v11_patB/04_isec_v11_patB_%j.err
+#SBATCH --output=/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v11_patB/04_isec_v11_patB_%j.log
+#SBATCH --error=/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap/output_v11_patB/04_isec_v11_patB_%j.err
 
 # ファイル名: 04_intersect_sv_v11_patB.sbatch
 # 処理内容:
 #   - Step 4 v11 (PATTERN=patB) を ncbn-cpu で実行
 #   - Pattern B (NAHR-included) の感度分析 overlap + burden 計算
-#   - 入力: /lustre12/home/kushima-pg/tad04292026/03_wgs_sv_events/output_v9/
+#   - 入力: /lustre12/home/kushima-pg/tad04212026/03_wgs_sv_events/output_v9/
 #            wgs_rare_sv_events_v9_patB.tsv.gz
 #   - 出力: output_v11_patB/
 #       sample_boundary_event_overlap_v11_patB.tsv.gz
@@ -25,7 +25,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="/lustre12/home/kushima-pg/tad04292026/04_wgs_sv_boundary_overlap"
+SCRIPT_DIR="/lustre12/home/kushima-pg/tad04212026/04_wgs_sv_boundary_overlap"
 OUT_DIR="${SCRIPT_DIR}/output_v11_patB"
 mkdir -p "${OUT_DIR}"
 
