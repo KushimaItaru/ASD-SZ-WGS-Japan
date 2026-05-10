@@ -49,7 +49,7 @@ Reproducing the full analyses additionally requires access to cohort-specific in
 
 If you use code from this repository, please cite:
 
-> Kushima et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia.* Manuscript in preparation, 2026 (target journal: *Nature Communications*).
+> Kushima et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia.* Manuscript in preparation, 2026.
 
 ## License
 
