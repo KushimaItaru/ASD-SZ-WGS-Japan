@@ -79,7 +79,8 @@ regression.
 ## GitHub README opening paragraph
 
 This repository contains the publication-ready workflows underlying
-Kushima et al., *Nature Communications* (2026): (i) the rare tandem-repeat
+Kushima et al. (manuscript in preparation, 2026; target journal:
+*Nature Communications*): (i) the rare tandem-repeat
 expansion (TRE) burden pipeline based on ExpansionHunter Denovo and
 STRling with 5-fold cross-fitted regression; (ii) the cell-type-resolved
 TAD boundary disruption pipeline with an architecture-level aggregate

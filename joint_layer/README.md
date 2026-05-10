@@ -82,4 +82,4 @@ Cohort-specific genotype-derived inputs are subject to the access controls descr
 
 If you use this code, please cite:
 
-> Kushima I., et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia*. (in submission)
+> Kushima I., et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia*. Manuscript in preparation, 2026 (target journal: *Nature Communications*).
