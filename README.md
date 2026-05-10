@@ -1,6 +1,6 @@
 # ASD-SZ-WGS-Japan
 
-Code repository for **"Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia"** (Kushima et al., *Nature Communications*, 2026).
+Code repository for **"Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia"** (Kushima et al., manuscript in preparation, 2026).
 
 ## Overview
 
