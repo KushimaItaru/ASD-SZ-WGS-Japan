@@ -38,9 +38,7 @@ testing); and (v) numerical-reproducibility verification scripts that
 re-derive the primary L2 burden numbers reported in the manuscript
 (`tad/99_verify_vs_draft`). The integrative joint-layer logistic regression
 for ASD and SZ is available at
-`joint_layer/asd_sz_layered_logistic_v6.R`. The source-data generation
-scripts for all main and supplementary figures will be deposited at the
-same repository before publication. Reproducing the full analyses
+`joint_layer/asd_sz_layered_logistic_v6.R`. Reproducing the full analyses
 additionally requires access to the cohort-specific input data and
 reference resources used in this study.
 
