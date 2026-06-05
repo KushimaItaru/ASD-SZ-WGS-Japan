@@ -1,5 +1,7 @@
 # ASD-SZ-WGS-Japan
 
+[![DOI](https://zenodo.org/badge/1164528445.svg)](https://doi.org/10.5281/zenodo.20556335)
+
 Code repository for **"Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia"** (Kushima et al., 2026; manuscript under review).
 
 ## Overview
