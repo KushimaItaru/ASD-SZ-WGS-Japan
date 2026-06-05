@@ -1,6 +1,6 @@
 # ASD-SZ-WGS-Japan
 
-Code repository for **"Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia"** (Kushima et al., manuscript in preparation, 2026).
+Code repository for **"Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia"** (Kushima et al., 2026; manuscript under review).
 
 ## Overview
 
@@ -37,7 +37,7 @@ conda env create -f environment.yml
 conda activate tre-burden
 ```
 
-External tools required on `$PATH`: `samtools >= 1.17`, `bedtools >= 2.31`, `STRling 0.5.2`, `ExpansionHunter Denovo 0.9`, `R >= 4.2` (with `readr`, `dplyr`, `tidyr` for the joint-layer module), plus SLURM for job scheduling.
+External tools required on `$PATH`: `samtools >= 1.17`, `bedtools >= 2.31`, `STRling 0.5.2`, `ExpansionHunter Denovo 0.9`, `R >= 4.2` (`readr`, `tibble`, `tidyr`, `dplyr`, `stringr`, `purrr`, `jsonlite`, `ggplot2`, `data.table`, `scales`, `pROC`), plus SLURM for job scheduling.
 
 ## Reproducibility note
 
@@ -49,7 +49,7 @@ Reproducing the full analyses additionally requires access to cohort-specific in
 
 If you use code from this repository, please cite:
 
-> Kushima et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia.* Manuscript in preparation, 2026.
+> Kushima et al. *Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia.* 2026 (manuscript under review).
 
 ## License
 

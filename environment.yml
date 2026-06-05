@@ -15,3 +15,6 @@ dependencies:
   - bedtools>=2.31
   - strling=0.5.2
   - expansionhunterdenovo=0.9
+  - anndata>=0.10
+  - intervaltree>=3.1
+  - openpyxl>=3.1

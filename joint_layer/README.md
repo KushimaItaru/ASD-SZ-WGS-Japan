@@ -1,6 +1,6 @@
 # Joint-layer integrative logistic regression analysis
 
-This directory contains the integrative joint-layer logistic-regression analysis described in *Kushima et al., Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia*. The analysis evaluates whether the primary WGS-enabled signals (TAD Diff_any-boundary deletion burden and rare TRE outlier carriage) retain independent contributions when conditioned on established coding, CNV, polygenic, or repeat-expansion risk layers.
+This directory contains the integrative joint-layer logistic-regression analysis described in *Kushima et al., Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia*. The analysis evaluates whether the primary WGS-enabled signals (TAD Diff_any-boundary deletion burden and rare TRE outlier carriage) retain independent contributions when conditioned on established coding, CNV, polygenic, or repeat-expansion risk layers.
 
 ## Output mapping to manuscript
 
@@ -82,4 +82,4 @@ Cohort-specific genotype-derived inputs are subject to the access controls descr
 
 If you use this code, please cite:
 
-> Kushima I., et al. *Shared rare tandem-repeat expansion burden and ASD-preferential developmental 3D-boundary deletion burden across autism and schizophrenia*. Manuscript in preparation, 2026.
+> Kushima I., et al. *Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia*. 2026 (manuscript under review).
