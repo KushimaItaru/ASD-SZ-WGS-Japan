@@ -54,3 +54,55 @@ If you use code from this repository, please cite:
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
+<!-- Paste this section into the repository README.md (e.g., after "Environment"). -->
+
+## Demo
+
+A small, fully self-contained demo is provided in [`demo/`](demo/) so that editors and
+reviewers can run the primary burden model **without access to the controlled-access
+cohort data**.
+
+### What it does
+`demo/run_demo_burden.py` fits the B′-aligned logistic burden regression used for the
+primary case–control analyses
+
+```
+case ~ burden_count + sex + PC1–PC10 + log1p(total_bases) + log1p(total_gene)
+```
+
+on a small **synthetic** per-individual table (`demo/demo_burden_input.tsv`; 600
+simulated individuals, no real participant data). A modest case-enriched burden is
+planted so the model returns a clear positive estimate.
+
+### System requirements
+- Operating system: Linux / macOS / Windows (any OS with Python).
+- Python ≥ 3.10 with `pandas`, `numpy`, `statsmodels` (see `requirements.txt` /
+  `environment.yml`). Tested with Python 3.13, statsmodels 0.14.4.
+- No non-standard hardware. Typical install time (dependencies): ~5–15 min;
+  the demo itself needs no compilation.
+
+### Run
+```bash
+cd demo
+python make_demo_data.py      # (optional) regenerate the synthetic table (seed = 42)
+python run_demo_burden.py
+```
+
+### Expected output (seed-fixed; runs in < 5 s on a normal desktop)
+```
+N (controls / cases) : 400 / 200
+  Odds ratio (OR)    : 1.555
+  95% CI             : 1.322 - 1.829
+  P value            : 9.548e-08
+Total run time       : ~0.01 s
+```
+(Exact values are reproducible with the provided seed; minor differences may occur
+across library versions.)
+
+### Notes
+- The demo data are **simulated**: they illustrate the analytical method only and do
+  not reproduce any manuscript result.
+- The full analyses require controlled-access cohort data (see the manuscript Data
+  availability statement). Numerical reproducibility of the **reported** numbers is
+  provided separately by `tad/99_verify_vs_draft/`, which re-derives the primary
+  burden values from intermediate, non-identifying summary inputs.
