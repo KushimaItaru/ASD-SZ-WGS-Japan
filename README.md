@@ -1,5 +1,15 @@
 # ASD-SZ-WGS-Japan
 
+> [!IMPORTANT]
+> **Archived legacy repository.** This code accompanies an earlier manuscript
+> version that included tandem-repeat expansion analyses and is not the code
+> release for the current developmental TAD-boundary manuscript. The current
+> audited release is available at
+> **https://github.com/KushimaItaru/ASD-SZ-TAD-boundary-WGS**.
+
+The files, releases, and Zenodo record in this repository are retained to
+preserve the provenance of the earlier manuscript version.
+
 [![DOI](https://zenodo.org/badge/1164528445.svg)](https://doi.org/10.5281/zenodo.20556335)
 
 Code repository for **"Shared rare tandem-repeat expansion burden and autism-enriched developmental TAD-boundary-annotated deletion burden across autism and schizophrenia"** (Kushima et al., 2026; manuscript under review).
